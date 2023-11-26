@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-@Controller("/")
+@Controller("/api")
 class RootController {
 
     private static final Logger log = LoggerFactory.getLogger(RootController)
@@ -27,7 +27,7 @@ class RootController {
     @Get(produces = MediaType.TEXT_HTML)
     HttpResponse<String> index() {
         log.info("Hit context root")
-        HttpResponse.ok(['<a href="/ping">/ping</a>', '<a href="/help">/help</a>', '<a href="/version">/version</a>'].toString())
+        HttpResponse.ok(['<a href="/api/ping">/ping</a>', '<a href="/api/help">/help</a>'].toString())
     }
 
     @Tag(name = "Root Operations")
@@ -45,18 +45,6 @@ class RootController {
     @ApiResponse(responseCode = "302")
     @Get(value = "/help")
     HttpResponse<String> help() {
-        return HttpResponse.redirect(new URI("swagger-ui/index.html"))
-    }
-
-    @Tag(name = "Root Operations")
-    @Operation(summary = "Returns the version of the API")
-    @ApiResponse(
-            responseCode = "200",
-            content = @Content(mediaType = "text/plain",
-                    schema = @Schema(type = "string"))
-    )
-    @Get(value = "/version", produces = MediaType.TEXT_PLAIN)
-    String version() {
-        return "0-0-1"
+        return HttpResponse.redirect(new URI("../swagger-ui/index.html"))
     }
 }

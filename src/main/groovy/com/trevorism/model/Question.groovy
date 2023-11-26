@@ -4,11 +4,11 @@ class Question {
 
     String id
     String text
+    String targetIdentityId
     Date createDate
     Date dueDate
     Date answeredDate
     List<String> answerFields
-    String targetIdentityId
     boolean answered
 
 }

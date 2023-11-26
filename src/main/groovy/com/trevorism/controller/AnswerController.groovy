@@ -2,6 +2,6 @@ package com.trevorism.controller
 
 import io.micronaut.http.annotation.Controller
 
-@Controller("answer")
+@Controller("/api/answer")
 class AnswerController {
 }
