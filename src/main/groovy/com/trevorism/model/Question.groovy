@@ -4,11 +4,8 @@ class Question {
 
     String id
     String text
-    String targetIdentityId
     Date createDate
-    Date dueDate
-    Date answeredDate
-    List<String> answerFields
     boolean answered
-
+    String identityId
+    ResponseConfiguration responseConfiguration
 }
