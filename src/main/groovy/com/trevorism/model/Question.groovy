@@ -7,5 +7,9 @@ class Question {
     Date createDate
     boolean answered
     String identityId
-    ResponseConfiguration responseConfiguration
+
+    String targetIdentityId
+    Date dueDate
+    String responseType
+    List<String> answerFields
 }

@@ -61,7 +61,7 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     implementation 'org.slf4j:slf4j-simple:2.0.9'
 
-    implementation 'com.trevorism:micronaut-utility-beans:1.0.0'
+    implementation 'com.trevorism:micronaut-utility-beans:1.1.0'
     implementation 'com.trevorism:datastore-client:3.2.0'
     implementation 'com.trevorism:reactions-client:0.6.0'
     implementation 'com.google.code.gson:gson:2.10.1'
@@ -92,7 +92,7 @@ appengine {
     stage.artifact = layout.buildDirectory.file("libs/${project.name}-all.jar")
     deploy {
         projectId = "trevorism-action"
-        version = "0-1-0"
+        version = "0-2-0"
     }
 }
 
