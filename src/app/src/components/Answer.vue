@@ -13,6 +13,11 @@ defineProps({
     required: true
   },
 })
+
+const formatDate = (date) => {
+  return new Date(date).toLocaleString()
+}
+
 </script>
 
 <template>
@@ -22,7 +27,7 @@ defineProps({
     </va-card-content>
     <va-divider></va-divider>
     <div class="text-right text-base mr-8">
-      <b>{{ user }}</b> answered on <b>{{ date }}</b>
+      <b>{{ user }}</b> answered on <b>{{ formatDate(date) }}</b>
     </div>
   </va-card>
 </template>

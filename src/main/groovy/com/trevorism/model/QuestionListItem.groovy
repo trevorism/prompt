@@ -2,6 +2,6 @@ package com.trevorism.model
 
 class QuestionListItem {
 
-    Question question
-    List<Answer> answers
+    UiQuestion question
+    List<UiAnswer> answers
 }

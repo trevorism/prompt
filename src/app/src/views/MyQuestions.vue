@@ -33,9 +33,9 @@ export default {
   <div>
     <div v-if="authenticated">
       <div v-for="item in questionList">
-        <question :date="item.question.createDate" :user="item.question.identityId" :text="item.question.text"></question>
+        <question :date="item.question.createDate" :user="item.question.username" :text="item.question.text"></question>
         <div v-for="answer in item.answers">
-          <answer :date="answer.answeredDate" :user="answer.identityId" :text="answer.text"></answer>
+          <answer :date="answer.answeredDate" :user="answer.username" :text="answer.text"></answer>
         </div>
       </div>
     </div>

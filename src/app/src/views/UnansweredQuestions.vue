@@ -33,7 +33,7 @@ export default {
   <div>
     <div v-if="authenticated">
       <div v-for="question in questionList">
-        <question :date="question.createDate" :user="question.identityId" :text="question.text"></question>
+        <question :date="question.createDate" :user="question.username" :text="question.text"></question>
       </div>
     </div>
     <div v-else>

@@ -2,6 +2,7 @@ package com.trevorism.controller
 
 import com.trevorism.model.Question
 import com.trevorism.model.QuestionListItem
+import com.trevorism.model.UiQuestion
 import com.trevorism.secure.Roles
 import com.trevorism.secure.Secure
 import com.trevorism.service.AnswerService
@@ -23,7 +24,7 @@ class QuestionListController {
     @Operation(summary = "Get a list of all Question and Answers **Secure")
     @Get(value = "/question", produces = MediaType.APPLICATION_JSON)
     @Secure(Roles.USER)
-    List<QuestionListItem> all(Authentication authentication) {
+    List<QuestionListItem> all() {
         answerService.getAllQuestions()
     }
 
@@ -39,7 +40,7 @@ class QuestionListController {
     @Operation(summary = "Get a list of all Question and Answers **Secure")
     @Get(value = "/unanswered", produces = MediaType.APPLICATION_JSON)
     @Secure(Roles.USER)
-    List<Question> unanswered() {
+    List<UiQuestion> unanswered() {
         answerService.getUnansweredQuestions()
     }
 
@@ -47,7 +48,7 @@ class QuestionListController {
     @Operation(summary = "Get a list of all Question and Answers **Secure")
     @Get(value = "/pending", produces = MediaType.APPLICATION_JSON)
     @Secure(Roles.USER)
-    List<Question> pending(Authentication authentication) {
+    List<UiQuestion> pending(Authentication authentication) {
         answerService.getPendingQuestions(authentication.getAttributes().get("id"))
     }
 }

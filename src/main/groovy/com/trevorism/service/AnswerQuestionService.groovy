@@ -5,19 +5,19 @@ import com.trevorism.data.Repository
 import com.trevorism.data.model.filtering.FilterBuilder
 import com.trevorism.data.model.filtering.SimpleFilter
 import com.trevorism.https.SecureHttpClient
-import com.trevorism.model.Answer
-import com.trevorism.model.Question
-import com.trevorism.model.QuestionListItem
+import com.trevorism.model.*
 
 @jakarta.inject.Singleton
 class AnswerQuestionService implements AnswerService {
 
     private Repository<Answer> answerRepository
     private Repository<Question> questionRepository
+    private Repository<User> userRepository
 
     AnswerQuestionService(SecureHttpClient secureHttpClient) {
         this.answerRepository = new FastDatastoreRepository<>(Answer, secureHttpClient)
         this.questionRepository = new FastDatastoreRepository<>(Question, secureHttpClient)
+        this.userRepository = new FastDatastoreRepository<>(User, secureHttpClient)
     }
 
     @Override
@@ -30,7 +30,7 @@ class AnswerQuestionService implements AnswerService {
         Answer created = answerRepository.create(answer)
 
         question.answered = true
-        Question updated = questionRepository.update(questionId, question)
+        questionRepository.update(questionId, question)
 
         return created
     }
@@ -38,43 +38,71 @@ class AnswerQuestionService implements AnswerService {
     @Override
     List<QuestionListItem> getAllQuestions() {
         List<Question> questions = questionRepository.list()
-        List<Answer> answers = answerRepository.list()
-        List<QuestionListItem> result = []
-        questions.each { question ->
-            QuestionListItem item = new QuestionListItem()
-            item.question = question
-            item.answers = answers.findAll { it.questionId == question.id }
-            result << item
-        }
-        return result
+        return appendAnswersToQuestions(questions)
     }
 
     @Override
-    List<Question> getUnansweredQuestions() {
-        List<Question> questions = questionRepository.filter(new FilterBuilder().addFilter(
-                new SimpleFilter("answered", "=", false)).build())
+    List<UiQuestion> getUnansweredQuestions() {
+        List<User> users = userRepository.list()
+        List<UiQuestion> questions = questionRepository
+                .filter(new FilterBuilder().addFilter(new SimpleFilter("answered", "=", false)).build())
+                .sort { a, b -> b.createDate <=> a.createDate }
+                .collect { Question question ->
+                    new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
+                            answered: question.answered, username: findMatchingUsername(users, question))
+                }
         return questions
     }
 
     @Override
     List<QuestionListItem> getMyQuestions(String identityId) {
-        List<Question> questions = questionRepository.filter(new FilterBuilder().addFilter(
-                new SimpleFilter("identityId", "=", identityId)).build())
-        List<Answer> answers = answerRepository.list()
-        List<QuestionListItem> result = []
-        questions.each { question ->
-            QuestionListItem item = new QuestionListItem()
-            item.question = question
-            item.answers = answers.findAll { it.questionId == question.id }
-            result << item
-        }
-        return result
+        List<Question> questions = questionRepository
+                .filter(new FilterBuilder().addFilter(new SimpleFilter("identityId", "=", identityId)).build())
+        return appendAnswersToQuestions(questions)
     }
 
     @Override
-    List<Question> getPendingQuestions(String identityId) {
-        List<Question> questions = questionRepository.filter(new FilterBuilder().addFilter(
-                new SimpleFilter("targetIdentityId", "=", identityId), new SimpleFilter("answered", "=", false)).build())
+    List<UiQuestion> getPendingQuestions(String identityId) {
+        List<User> users = userRepository.list()
+        List<UiQuestion> questions = questionRepository
+                .filter(new FilterBuilder().addFilter(
+                        new SimpleFilter("targetIdentityId", "=", identityId),
+                        new SimpleFilter("answered", "=", false)).build())
+                .sort { a, b -> b.createDate <=> a.createDate }
+                .collect { Question question ->
+                    new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
+                            answered: question.answered, username: findMatchingUsername(users, question))
+                }
         return questions
     }
+
+    private ArrayList<QuestionListItem> appendAnswersToQuestions(List<Question> questions) {
+        List<Answer> answers = answerRepository.list()
+        List<User> users = userRepository.list()
+        List<QuestionListItem> result = []
+        questions.sort { a, b -> b.createDate <=> a.createDate }
+                .each { question ->
+                    QuestionListItem item = createQuestionListItem(question, answers, users)
+                    result << item
+                }
+        return result
+    }
+
+    private static QuestionListItem createQuestionListItem(Question question, List<Answer> answers, List<User> users) {
+        QuestionListItem item = new QuestionListItem()
+        item.question = new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
+                answered: question.answered, username: findMatchingUsername(users, question))
+        item.answers = answers.findAll { it.questionId == question.id }
+                .sort { a, b -> b.answeredDate <=> a.answeredDate }
+                .collect { Answer answer ->
+                    new UiAnswer(id: answer.id, answeredDate: answer.answeredDate, questionId: answer.questionId,
+                            text: answer.text, username: users.find({ it.id == answer.identityId })?.username)
+                }
+        return item
+    }
+
+    private static String findMatchingUsername(List<User> users, question) {
+        users.find({ it.id == question.identityId })?.username
+    }
+
 }
