@@ -5,6 +5,7 @@ import com.trevorism.data.Repository
 import com.trevorism.https.SecureHttpClient
 import com.trevorism.model.Answer
 import com.trevorism.model.Question
+import com.trevorism.model.UiAnswer
 import com.trevorism.secure.Roles
 import com.trevorism.secure.Secure
 import com.trevorism.service.AnswerService
@@ -88,7 +89,7 @@ class QuestionController {
     @Operation(summary = "Answer a question by id **Secure")
     @Post(value = "{id}/answer", produces = MediaType.APPLICATION_JSON)
     @Secure(Roles.USER)
-    Answer answerQuestion(String id, @Body Answer answer, Authentication authentication) {
+    UiAnswer answerQuestion(String id, @Body Answer answer, Authentication authentication) {
         String identityId = authentication?.attributes?.get("id")
         answerService.answerQuestion(id, answer, identityId)
     }

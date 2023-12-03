@@ -1,6 +1,5 @@
 package com.trevorism.controller
 
-import com.trevorism.model.Question
 import com.trevorism.model.QuestionListItem
 import com.trevorism.model.UiQuestion
 import com.trevorism.secure.Roles

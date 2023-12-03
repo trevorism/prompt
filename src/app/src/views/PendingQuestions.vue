@@ -9,11 +9,17 @@ export default {
   data () {
     return {
       authenticated: false,
-      questionList : []
+      answered: false,
+      questionList : [],
+      answer: {}
     }
   },
   methods: {
-
+    setAnswer(answerFromServer) {
+      let self = this
+      self.answer = answerFromServer
+      self.answered = true
+    }
   },
   mounted () {
     let self = this
@@ -33,7 +39,11 @@ export default {
   <div>
     <div v-if="authenticated">
       <div v-for="question in questionList">
-        <question :date="question.createDate" :user="question.username" :text="question.text"></question>
+        <question :id="question.id" :date="question.createDate"
+                  :user="question.username" :text="question.text" :answerMode="true"
+                  @answeredQuestion="appendAnsweredQuestion"></question>
+        <answer v-if="answered" :date="answer.answeredDate" :user="answer.username" :text="answer.text"></answer>
+
       </div>
     </div>
     <div v-else>

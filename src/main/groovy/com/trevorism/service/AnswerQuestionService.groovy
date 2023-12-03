@@ -21,8 +21,9 @@ class AnswerQuestionService implements AnswerService {
     }
 
     @Override
-    Answer answerQuestion(String questionId, Answer answer, String identityId) {
+    UiAnswer answerQuestion(String questionId, Answer answer, String identityId) {
         Question question = questionRepository.get(questionId)
+        List<User> users = userRepository.list()
 
         answer.answeredDate = new Date()
         answer.questionId = questionId
@@ -32,7 +33,9 @@ class AnswerQuestionService implements AnswerService {
         question.answered = true
         questionRepository.update(questionId, question)
 
-        return created
+        return new UiAnswer(id: created.id, answeredDate: created.answeredDate, questionId: created.questionId,
+                text: created.text, username: users.find({ it.id == created.identityId })?.username)
+
     }
 
     @Override
