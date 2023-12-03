@@ -6,8 +6,11 @@ import PendingQuestions from "./PendingQuestions.vue";
 import AllQuestions from "./AllQuestions.vue";
 import UnansweredQuestions from "./UnansweredQuestions.vue";
 import MyQuestions from "./MyQuestions.vue";
+import {useCookies} from "vue3-cookies";
 
 const selectedTab = ref(0);
+const {cookies} = useCookies();
+const authenticated = ref(!!cookies.get("session"));
 
 </script>
 
@@ -15,7 +18,12 @@ const selectedTab = ref(0);
   <div>
     <header-bar :local=false></header-bar>
     <div class="m-6">
-      <va-button color="primary" to="/ask"> Ask A Question</va-button>
+      <div v-if="authenticated">
+      <va-button color="violet-600" to="/ask">Ask A Question</va-button>
+      </div>
+      <div v-else>
+        <va-button color="primary" href="https://trevorism.com/login?return_url=https://prompt.action.trevorism.com"> Login </va-button>
+      </div>
       <va-tabs v-model="selectedTab">
         <va-tab> Need an Answer </va-tab>
         <va-tab> All Unanswered Questions </va-tab>
