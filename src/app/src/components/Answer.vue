@@ -21,8 +21,8 @@ const formatDate = (date) => {
 </script>
 
 <template>
-  <va-card class="border border-red-400 ml-16 mt-8 mb-8 mr-8">
-    <va-card-content class="text-2xl">
+  <va-card class="border border-red-400 ml-16 mt-4 mb-4 mr-4">
+    <va-card-content class="text-base">
       {{ text }}
     </va-card-content>
     <va-divider></va-divider>

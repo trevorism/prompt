@@ -68,9 +68,9 @@ const showAnswerPrompt = () => {
 
 <template>
   <div>
-    <va-card class="border-double border-4 border-indigo-600 m-8">
+    <va-card class="border-double border-4 border-indigo-600 m-4">
       <va-card-title>Question</va-card-title>
-      <va-card-content class="text-2xl">
+      <va-card-content class="text-lg">
         {{ text }}
       </va-card-content>
       <div class="text-right" v-if="answerButtonVisible">
