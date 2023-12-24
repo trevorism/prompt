@@ -22,7 +22,7 @@ const authenticated = ref(!!cookies.get("session"));
       <va-button color="violet-600" to="/ask">Ask A Question</va-button>
       </div>
       <div v-else>
-        <va-button color="primary" href="https://trevorism.com/login?return_url=https://prompt.action.trevorism.com"> Login </va-button>
+        <va-button color="primary" href="https://login.auth.trevorism.com/?return_url=https://prompt.action.trevorism.com"> Login </va-button>
       </div>
       <va-tabs v-model="selectedTab">
         <va-tab> Need an Answer </va-tab>
