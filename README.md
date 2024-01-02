@@ -6,7 +6,7 @@
 
 Prompt for questions and get answers.
 
-Current version: 0.3.0
+Current version: 0.4.0
 
 # How to build
 `gradle clean build`

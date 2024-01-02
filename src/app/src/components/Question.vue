@@ -1,7 +1,6 @@
 <script setup>
-
-import axios from "axios";
-import {ref, defineEmits} from "vue";
+import axios from 'axios'
+import { ref, defineEmits } from 'vue'
 
 const props = defineProps({
   id: {
@@ -24,7 +23,7 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false
-  },
+  }
 })
 
 const emit = defineEmits(['answeredQuestion'])
@@ -40,18 +39,21 @@ const answerButtonVisible = ref(!props.answerMode)
 const handleSubmit = () => {
   answerFormVisible.value = false
   answerButtonVisible.value = false
-  axios.post('api/question/' + props.id + '/answer', {
-    text: answerText.value
-  }).then((answer) => {
-    answerFormVisible.value = false
-    answerButtonVisible.value = true
-    answerText.value = ''
-    emit('answeredQuestion', answer.data)
-  }).catch(() => {
-    answerFormVisible.value = true
-    answerButtonVisible.value = true
-    errorMessage.value = 'Error submitting question'
-  })
+  axios
+    .post('api/question/' + props.id + '/answer', {
+      text: answerText.value
+    })
+    .then((answer) => {
+      answerFormVisible.value = false
+      answerButtonVisible.value = true
+      answerText.value = ''
+      emit('answeredQuestion', answer.data)
+    })
+    .catch(() => {
+      answerFormVisible.value = true
+      answerButtonVisible.value = true
+      errorMessage.value = 'Error submitting question'
+    })
 }
 
 const handleCancel = () => {
@@ -63,7 +65,6 @@ const showAnswerPrompt = () => {
   answerFormVisible.value = true
   answerButtonVisible.value = false
 }
-
 </script>
 
 <template>
@@ -82,8 +83,9 @@ const showAnswerPrompt = () => {
       </div>
       <va-form v-if="answerFormVisible">
         <va-textarea
-            class="block p-4 w-full text-base text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500"
-            v-model="answerText" label="Your Answer"
+          class="block p-4 w-full text-base text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500"
+          v-model="answerText"
+          label="Your Answer"
         >
         </va-textarea>
         <div class="text-center w-full">
@@ -95,9 +97,7 @@ const showAnswerPrompt = () => {
         </va-button-group>
       </va-form>
     </va-card>
-
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -33,8 +33,12 @@ class AnswerQuestionService implements AnswerService {
         question.answered = true
         questionRepository.update(questionId, question)
 
+        String username = users.find({ it.id == created.identityId })?.username
+        if(identityId == "Chat GPT")
+            username = "Chat GPT"
+
         return new UiAnswer(id: created.id, answeredDate: created.answeredDate, questionId: created.questionId,
-                text: created.text, username: users.find({ it.id == created.identityId })?.username)
+                text: created.text, username: username)
 
     }
 
@@ -79,6 +83,11 @@ class AnswerQuestionService implements AnswerService {
         return questions
     }
 
+    @Override
+    List<User> getAllUsers() {
+        userRepository.list()
+    }
+
     private ArrayList<QuestionListItem> appendAnswersToQuestions(List<Question> questions) {
         List<Answer> answers = answerRepository.list()
         List<User> users = userRepository.list()
@@ -98,8 +107,12 @@ class AnswerQuestionService implements AnswerService {
         item.answers = answers.findAll { it.questionId == question.id }
                 .sort { a, b -> b.answeredDate <=> a.answeredDate }
                 .collect { Answer answer ->
+                    String username = users.find({ it.id == answer.identityId })?.username
+                    if(answer.identityId == "Chat GPT")
+                        username = "Chat GPT"
+
                     new UiAnswer(id: answer.id, answeredDate: answer.answeredDate, questionId: answer.questionId,
-                            text: answer.text, username: users.find({ it.id == answer.identityId })?.username)
+                            text: answer.text, username: username)
                 }
         return item
     }

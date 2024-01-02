@@ -1,28 +1,31 @@
 <script setup>
+import HeaderBar from '@trevorism/ui-header-bar'
+import { ref } from 'vue'
+import PendingQuestions from './PendingQuestions.vue'
+import AllQuestions from './AllQuestions.vue'
+import UnansweredQuestions from './UnansweredQuestions.vue'
+import MyQuestions from './MyQuestions.vue'
+import { useCookies } from 'vue3-cookies'
 
-import HeaderBar from "@trevorism/ui-header-bar";
-import {ref} from "vue";
-import PendingQuestions from "./PendingQuestions.vue";
-import AllQuestions from "./AllQuestions.vue";
-import UnansweredQuestions from "./UnansweredQuestions.vue";
-import MyQuestions from "./MyQuestions.vue";
-import {useCookies} from "vue3-cookies";
-
-const selectedTab = ref(0);
-const {cookies} = useCookies();
-const authenticated = ref(!!cookies.get("session"));
-
+const selectedTab = ref(0)
+const { cookies } = useCookies()
+const authenticated = ref(!!cookies.get('session'))
 </script>
 
 <template>
   <div>
-    <header-bar :local=false></header-bar>
+    <header-bar :local="false"></header-bar>
     <div class="m-6">
       <div v-if="authenticated">
-      <va-button color="violet-600" to="/ask">Ask A Question</va-button>
+        <va-button color="violet-600" to="/ask">Ask A Question</va-button>
       </div>
       <div v-else>
-        <va-button color="primary" href="https://login.auth.trevorism.com/?return_url=https://prompt.action.trevorism.com"> Login </va-button>
+        <va-button
+          color="primary"
+          href="https://login.auth.trevorism.com/?return_url=https://prompt.action.trevorism.com"
+        >
+          Login
+        </va-button>
       </div>
       <va-tabs v-model="selectedTab">
         <va-tab> Need an Answer </va-tab>
@@ -48,6 +51,4 @@ const authenticated = ref(!!cookies.get("session"));
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -7,6 +7,7 @@ class Question {
     Date createDate
     boolean answered
     String identityId
+    boolean askChatGpt
 
     String targetIdentityId
     Date dueDate

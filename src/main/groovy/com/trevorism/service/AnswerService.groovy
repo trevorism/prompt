@@ -5,6 +5,7 @@ import com.trevorism.model.Question
 import com.trevorism.model.QuestionListItem
 import com.trevorism.model.UiAnswer
 import com.trevorism.model.UiQuestion
+import com.trevorism.model.User
 
 interface AnswerService {
 
@@ -14,4 +15,5 @@ interface AnswerService {
     List<QuestionListItem> getMyQuestions(String identityId)
     List<UiQuestion> getUnansweredQuestions()
     List<UiQuestion> getPendingQuestions(String identityId)
+    List<User> getAllUsers()
 }

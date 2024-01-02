@@ -11,13 +11,12 @@ defineProps({
   date: {
     type: Number,
     required: true
-  },
+  }
 })
 
 const formatDate = (date) => {
   return new Date(date).toLocaleString()
 }
-
 </script>
 
 <template>
@@ -32,5 +31,4 @@ const formatDate = (date) => {
   </va-card>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

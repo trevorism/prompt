@@ -1,9 +1,11 @@
 package com.trevorism.controller
 
+import com.google.gson.Gson
 import com.trevorism.data.PingingDatastoreRepository
 import com.trevorism.data.Repository
 import com.trevorism.https.SecureHttpClient
 import com.trevorism.model.Answer
+import com.trevorism.model.ChatGptMessage
 import com.trevorism.model.Question
 import com.trevorism.model.UiAnswer
 import com.trevorism.secure.Roles
@@ -27,12 +29,17 @@ import org.slf4j.LoggerFactory
 class QuestionController {
 
     private Repository<Question> repository
+    private SecureHttpClient secureHttpClient
+
+
     private static final Logger log = LoggerFactory.getLogger(QuestionController.class.name)
 
     @Inject
     AnswerService answerService
 
+
     QuestionController(SecureHttpClient secureHttpClient) {
+        this.secureHttpClient = secureHttpClient;
         this.repository = new PingingDatastoreRepository<>(Question, secureHttpClient)
     }
 
@@ -41,10 +48,20 @@ class QuestionController {
     @Post(value = "/", produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
     @Secure(Roles.USER)
     Question createQuestion(@Body Question question, Authentication authentication) {
+        if(question.text == null || question.text.isEmpty())
+            throw new RuntimeException("Question text is required")
+
         question.createDate = new Date()
         question.answered = false
         question.identityId = authentication?.attributes?.get("id")
-        repository.create(question)
+        Question created = repository.create(question)
+
+        if(question.askChatGpt) {
+            String response = secureHttpClient.post("https://chat.action.trevorism.com/api/chat", new ChatGptMessage(message: question.text).toJson())
+            ChatGptMessage chatGptResponse = ChatGptMessage.fromJson(response)
+            answerService.answerQuestion(created.id, new Answer(text: chatGptResponse.message), "Chat GPT")
+        }
+        return created
     }
 
     @Tag(name = "Question Operations")
