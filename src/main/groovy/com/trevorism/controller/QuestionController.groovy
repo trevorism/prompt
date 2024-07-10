@@ -28,18 +28,15 @@ import org.slf4j.LoggerFactory
 @Controller("/api/question")
 class QuestionController {
 
+    private static final Logger log = LoggerFactory.getLogger(QuestionController.class.name)
     private Repository<Question> repository
     private SecureHttpClient secureHttpClient
-
-
-    private static final Logger log = LoggerFactory.getLogger(QuestionController.class.name)
 
     @Inject
     AnswerService answerService
 
-
     QuestionController(SecureHttpClient secureHttpClient) {
-        this.secureHttpClient = secureHttpClient;
+        this.secureHttpClient = secureHttpClient
         this.repository = new PingingDatastoreRepository<>(Question, secureHttpClient)
     }
 

@@ -52,7 +52,7 @@ class AnswerQuestionService implements AnswerService {
     List<UiQuestion> getUnansweredQuestions() {
         List<User> users = userRepository.list()
         List<UiQuestion> questions = questionRepository
-                .filter(new FilterBuilder().addFilter(new SimpleFilter("answered", "=", false)).build())
+                .filter(new SimpleFilter("answered", "=", false))
                 .sort { a, b -> b.createDate <=> a.createDate }
                 .collect { Question question ->
                     new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
@@ -64,7 +64,7 @@ class AnswerQuestionService implements AnswerService {
     @Override
     List<QuestionListItem> getMyQuestions(String identityId) {
         List<Question> questions = questionRepository
-                .filter(new FilterBuilder().addFilter(new SimpleFilter("identityId", "=", identityId)).build())
+                .filter(new SimpleFilter("identityId", "=", identityId))
         return appendAnswersToQuestions(questions)
     }
 
