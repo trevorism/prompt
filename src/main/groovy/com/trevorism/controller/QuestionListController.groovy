@@ -50,4 +50,12 @@ class QuestionListController {
     List<UiQuestion> pending(Authentication authentication) {
         answerService.getPendingQuestions(authentication.getAttributes().get("id"))
     }
+
+    @Tag(name = "App Operations")
+    @Operation(summary = "Get a list of all Question and Answers **Secure")
+    @Get(value = "/{id}", produces = MediaType.APPLICATION_JSON)
+    @Secure(Roles.USER)
+    UiQuestion getSingleQuestion(String id, Authentication authentication) {
+        answerService.getQuestion(id)
+    }
 }

@@ -40,12 +40,11 @@ class AnswerQuestionService implements AnswerService {
 
         return new UiAnswer(id: created.id, answeredDate: created.answeredDate, questionId: created.questionId,
                 text: created.text, username: username)
-
     }
 
     @Override
     List<QuestionListItem> getAllQuestions() {
-        List<Question> questions = questionRepository.list()
+        List<Question> questions = questionRepository.filter(new SimpleFilter("privateQuestion", FilterConstants.OPERATOR_EQUAL, false))
         return appendAnswersToQuestions(questions)
     }
 
@@ -53,7 +52,10 @@ class AnswerQuestionService implements AnswerService {
     List<UiQuestion> getUnansweredQuestions() {
         List<User> users = userRepository.list()
         List<UiQuestion> questions = questionRepository
-                .filter(new SimpleFilter("answered", "=", false))
+                .filter(new FilterBuilder()
+                        .addFilter(new SimpleFilter("answered", FilterConstants.OPERATOR_EQUAL, false))
+                        .addFilter(new SimpleFilter("privateQuestion", FilterConstants.OPERATOR_EQUAL, false))
+                        .build())
                 .sort { a, b -> b.createDate <=> a.createDate }
                 .collect { Question question ->
                     new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
@@ -64,8 +66,7 @@ class AnswerQuestionService implements AnswerService {
 
     @Override
     List<QuestionListItem> getMyQuestions(String identityId) {
-        List<Question> questions = questionRepository
-                .filter(new SimpleFilter("identityId", "=", identityId))
+        List<Question> questions = questionRepository.filter(new SimpleFilter("identityId", FilterConstants.OPERATOR_EQUAL, identityId))
         return appendAnswersToQuestions(questions)
     }
 
@@ -74,8 +75,9 @@ class AnswerQuestionService implements AnswerService {
         List<User> users = userRepository.list()
         List<UiQuestion> questions = questionRepository
                 .filter(new FilterBuilder().addFilter(
-                        new SimpleFilter("targetIdentityId", "=", identityId),
-                        new SimpleFilter("answered", "=", false)).build())
+                        new SimpleFilter("targetIdentityId", FilterConstants.OPERATOR_EQUAL, identityId),
+                        new SimpleFilter("answered", FilterConstants.OPERATOR_EQUAL, false),
+                        new SimpleFilter("privateQuestion", FilterConstants.OPERATOR_EQUAL, false)).build())
                 .sort { a, b -> b.createDate <=> a.createDate }
                 .collect { Question question ->
                     new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
@@ -87,6 +89,14 @@ class AnswerQuestionService implements AnswerService {
     @Override
     List<User> getActiveUsers() {
         userRepository.filter(new SimpleFilter("active", FilterConstants.OPERATOR_EQUAL, true)).sort { a, b -> a.username <=> b.username }
+    }
+
+    @Override
+    UiQuestion getQuestion(String id) {
+        List<User> users = userRepository.list()
+        Question question = questionRepository.get(id)
+        return new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
+                answered: question.answered, username: findMatchingUsername(users, question))
     }
 
     private ArrayList<QuestionListItem> appendAnswersToQuestions(List<Question> questions) {

@@ -1,3 +1,7 @@
+## 0.7.0
+
+Backend support for private questions and due dates.
+
 ## 0.6.0
 
 Enable requests to a specific user.

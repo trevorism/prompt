@@ -48,7 +48,7 @@ export default {
           :user="question.username"
           :text="question.text"
           :answerMode="true"
-          @answeredQuestion="appendAnsweredQuestion"
+          @answeredQuestion="setAnswer"
         ></question>
         <answer v-if="answered" :date="answer.answeredDate" :user="answer.username" :text="answer.text"></answer>
       </div>

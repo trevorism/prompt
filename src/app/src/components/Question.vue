@@ -40,7 +40,7 @@ const handleSubmit = () => {
   answerFormVisible.value = false
   answerButtonVisible.value = false
   axios
-    .post('api/question/' + props.id + '/answer', {
+    .post('/api/question/' + props.id + '/answer', {
       text: answerText.value
     })
     .then((answer) => {

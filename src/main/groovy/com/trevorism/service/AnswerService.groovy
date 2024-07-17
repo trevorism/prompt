@@ -15,4 +15,6 @@ interface AnswerService {
     List<UiQuestion> getUnansweredQuestions()
     List<UiQuestion> getPendingQuestions(String identityId)
     List<User> getActiveUsers()
+
+    UiQuestion getQuestion(String id)
 }

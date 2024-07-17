@@ -20,7 +20,7 @@ const formatDate = (date) => {
 </script>
 
 <template>
-  <va-card class="border border-red-400 ml-16 mt-4 mb-4 mr-4">
+  <va-card class="border border-green-400 ml-16 mt-4 mb-4 mr-4">
     <va-card-content class="text-base">
       {{ text }}
     </va-card-content>
