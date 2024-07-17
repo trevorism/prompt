@@ -3,6 +3,7 @@ package com.trevorism.service
 import com.trevorism.data.FastDatastoreRepository
 import com.trevorism.data.Repository
 import com.trevorism.data.model.filtering.FilterBuilder
+import com.trevorism.data.model.filtering.FilterConstants
 import com.trevorism.data.model.filtering.SimpleFilter
 import com.trevorism.https.SecureHttpClient
 import com.trevorism.model.*
@@ -84,8 +85,8 @@ class AnswerQuestionService implements AnswerService {
     }
 
     @Override
-    List<User> getAllUsers() {
-        userRepository.list()
+    List<User> getActiveUsers() {
+        userRepository.filter(new SimpleFilter("active", FilterConstants.OPERATOR_EQUAL, true)).sort { a, b -> a.username <=> b.username }
     }
 
     private ArrayList<QuestionListItem> appendAnswersToQuestions(List<Question> questions) {

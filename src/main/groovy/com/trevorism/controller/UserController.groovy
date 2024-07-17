@@ -1,6 +1,6 @@
 package com.trevorism.controller
 
-import com.trevorism.model.Question
+
 import com.trevorism.model.User
 import com.trevorism.secure.Roles
 import com.trevorism.secure.Secure
@@ -27,6 +27,6 @@ class UserController {
     @Get(value = "/", produces = MediaType.APPLICATION_JSON)
     @Secure(Roles.USER)
     List<User> list() {
-        answerService.getAllUsers()
+        answerService.getActiveUsers()
     }
 }

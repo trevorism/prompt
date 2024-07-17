@@ -1,3 +1,7 @@
+## 0.6.0
+
+Enable requests to a specific user.
+
 ## 0.5.0
 
 Update dependencies.

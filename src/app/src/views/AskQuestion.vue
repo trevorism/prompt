@@ -10,7 +10,9 @@ export default {
     return {
       text: '',
       askChatGpt: false,
+      collapsed: false,
       askUser: '',
+      userOptions: [],
       dueDate: '',
       errorMessage: ''
     }
@@ -25,7 +27,8 @@ export default {
       axios
         .post('api/question', {
           text: this.text,
-          askChatGpt: this.askChatGpt
+          askChatGpt: this.askChatGpt,
+          targetIdentityId: this.askUser
         })
         .then(() => {
           this.errorMessage = ''
@@ -35,6 +38,12 @@ export default {
           this.errorMessage = 'Error submitting question'
         })
     }
+  },
+  mounted() {
+    axios.get('api/user').then((result) => {
+      this.userOptions = result.data
+      this.userOptions.unshift({ id: null, username: 'Anyone' })
+    });
   }
 }
 </script>
@@ -52,7 +61,12 @@ export default {
           label="Your Question"
         >
         </va-textarea>
-        <VaCheckbox class="mt-4" v-model="askChatGpt" label="Ask Chat-GPT?" />
+        <VaCollapse v-model="collapsed" header="Advanced Options" >
+          <div class="w-1/4"><VaCheckbox class="mt-4 w-full" v-model="askChatGpt" label="Ask Chat-GPT?" /></div>
+          <div class="w-1/4"><VaSelect class="mt-4 w-full" v-model="askUser" label="Ask Specific User" :options="userOptions" text-by="username" value-by="id"  /></div>
+        </VaCollapse>
+
+
         <div class="text-center w-full">
           <div v-if="errorMessage.length > 0" class="text-center text-red-600">{{ errorMessage }}</div>
         </div>
