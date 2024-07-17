@@ -11,6 +11,5 @@ class Question {
 
     String targetIdentityId
     Date dueDate
-    String responseType
-    List<String> answerFields
+    boolean privateQuestion
 }

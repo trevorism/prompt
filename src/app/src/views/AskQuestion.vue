@@ -10,10 +10,11 @@ export default {
     return {
       text: '',
       askChatGpt: false,
+      privateQuestion: false,
       collapsed: false,
       askUser: '',
       userOptions: [],
-      dueDate: '',
+      dueDate: null,
       errorMessage: ''
     }
   },
@@ -24,11 +25,14 @@ export default {
         return
       }
       this.errorMessage = ''
+      const dueDateISO = this.dueDate ? new Date(this.dueDate).toISOString() : null;
       axios
         .post('api/question', {
           text: this.text,
           askChatGpt: this.askChatGpt,
-          targetIdentityId: this.askUser
+          targetIdentityId: this.askUser,
+          privateQuestion: this.privateQuestion,
+          dueDate: dueDateISO
         })
         .then(() => {
           this.errorMessage = ''
@@ -37,6 +41,14 @@ export default {
         .catch(() => {
           this.errorMessage = 'Error submitting question'
         })
+    },
+    handleSelectChange(newValue) {
+      if(this.askUser === null){
+        this.privateQuestion = false
+      }
+    },
+    clearDate() {
+      this.dueDate = null
     }
   },
   mounted() {
@@ -62,8 +74,12 @@ export default {
         >
         </va-textarea>
         <VaCollapse v-model="collapsed" header="Advanced Options" >
-          <div class="w-1/4"><VaCheckbox class="mt-4 w-full" v-model="askChatGpt" label="Ask Chat-GPT?" /></div>
-          <div class="w-1/4"><VaSelect class="mt-4 w-full" v-model="askUser" label="Ask Specific User" :options="userOptions" text-by="username" value-by="id"  /></div>
+          <div class="border-2 border-gray-500 p-6">
+            <div class="w-1/2"><VaCheckbox class="mt-4 w-full" v-model="askChatGpt" label="Ask Chat-GPT?" /></div>
+            <div class="w-1/2"><VaSelect class="mt-4 w-full" v-model="askUser" label="Ask Specific User" :options="userOptions" text-by="username" value-by="id" @update:modelValue="handleSelectChange" /></div>
+            <div class="w-1/2"><VaCheckbox class="mt-4 w-full" v-model="privateQuestion" label="Should the question be private to the selected user?" /></div>
+            <div class="w-1/2 mt-4">Due Date: <va-date-input v-model="dueDate" mode="single" /> <va-chip color="warning" @click="clearDate">Clear</va-chip></div>
+          </div>
         </VaCollapse>
 
 
