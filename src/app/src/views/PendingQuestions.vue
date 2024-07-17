@@ -27,7 +27,7 @@ export default {
     self.authenticated = !!cookies.get('session')
 
     axios
-      .get('/api/list/pending/')
+      .get('/api/list/pending')
       .then((result) => {
         self.questionList = result.data
       })

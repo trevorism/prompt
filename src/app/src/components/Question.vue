@@ -34,11 +34,14 @@ const formatDate = (date) => {
 
 const answerText = ref('')
 const errorMessage = ref('')
+const loading = ref(false)
 const answerFormVisible = ref(props.answerMode)
 const answerButtonVisible = ref(!props.answerMode)
+
 const handleSubmit = () => {
   answerFormVisible.value = false
   answerButtonVisible.value = false
+  loading.value = true
   axios
     .post('/api/question/' + props.id + '/answer', {
       text: answerText.value
@@ -47,11 +50,13 @@ const handleSubmit = () => {
       answerFormVisible.value = false
       answerButtonVisible.value = true
       answerText.value = ''
+      loading.value = false
       emit('answeredQuestion', answer.data)
     })
     .catch(() => {
       answerFormVisible.value = true
       answerButtonVisible.value = true
+      loading.value = false
       errorMessage.value = 'Error submitting question'
     })
 }
@@ -92,8 +97,12 @@ const showAnswerPrompt = () => {
           <div v-if="errorMessage.length > 0" class="text-center text-red-600">{{ errorMessage }}</div>
         </div>
         <va-button-group class="w-full my-2 flex justify-center space-x-4">
-          <va-button type="submit" color="primary" @click="handleSubmit">Submit</va-button>
-          <va-button color="danger" @click="handleCancel">Cancel</va-button>
+          <va-button type="submit" color="primary" @click="handleSubmit">
+            <va-inner-loading :loading="loading"> Submit </va-inner-loading>
+          </va-button>
+          <va-button color="danger" @click="handleCancel">
+            <va-inner-loading :loading="loading"> Cancel </va-inner-loading>
+          </va-button>
         </va-button-group>
       </va-form>
     </va-card>

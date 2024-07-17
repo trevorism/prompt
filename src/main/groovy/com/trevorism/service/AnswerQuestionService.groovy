@@ -76,8 +76,7 @@ class AnswerQuestionService implements AnswerService {
         List<UiQuestion> questions = questionRepository
                 .filter(new FilterBuilder().addFilter(
                         new SimpleFilter("targetIdentityId", FilterConstants.OPERATOR_EQUAL, identityId),
-                        new SimpleFilter("answered", FilterConstants.OPERATOR_EQUAL, false),
-                        new SimpleFilter("privateQuestion", FilterConstants.OPERATOR_EQUAL, false)).build())
+                        new SimpleFilter("answered", FilterConstants.OPERATOR_EQUAL, false)).build())
                 .sort { a, b -> b.createDate <=> a.createDate }
                 .collect { Question question ->
                     new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,

@@ -47,9 +47,8 @@ const answerSingleQuestion = () => {
           :answerMode="true"
           @answeredQuestion="answerSingleQuestion"
       ></question>
-
     </div>
-    <div v-else>You must login to view your questions pending an answer.</div>
+    <div v-else>You must login to view your question.</div>
   </div>
 </template>
 
