@@ -15,7 +15,8 @@ export default {
       askUser: '',
       userOptions: [],
       dueDate: null,
-      errorMessage: ''
+      errorMessage: '',
+      loading: false
     }
   },
   methods: {
@@ -26,6 +27,7 @@ export default {
       }
       this.errorMessage = ''
       const dueDateISO = this.dueDate ? new Date(this.dueDate).toISOString() : null;
+      this.loading = true
       axios
         .post('api/question', {
           text: this.text,
@@ -36,9 +38,11 @@ export default {
         })
         .then(() => {
           this.errorMessage = ''
+          this.loading = false
           this.$router.push('/')
         })
         .catch(() => {
+          this.loading = false
           this.errorMessage = 'Error submitting question'
         })
     },
@@ -87,8 +91,12 @@ export default {
           <div v-if="errorMessage.length > 0" class="text-center text-red-600">{{ errorMessage }}</div>
         </div>
         <va-button-group class="w-full my-2 flex justify-center space-x-4">
-          <va-button type="submit" color="primary" @click="handleSubmit">Submit</va-button>
-          <va-button color="danger" to="/">Cancel</va-button>
+          <va-button type="submit" color="primary" @click="handleSubmit">
+            <va-inner-loading :loading="loading">Submit</va-inner-loading>
+          </va-button>
+          <va-button color="danger" to="/">
+            <va-inner-loading :loading="loading">Cancel</va-inner-loading>
+          </va-button>
         </va-button-group>
       </va-form>
     </div>

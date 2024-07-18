@@ -73,9 +73,10 @@ class QuestionController {
                 ScheduleService scheduleService = new DefaultScheduleService(secureHttpClient)
                 ScheduledTaskFactory factory = new DefaultScheduledTaskFactory()
                 Gson gson = new Gson()
-                Email email = new Email([subject: "Trevorism is prompting you to answer a question", body: buildEmailBody(created), recipients: [getUserEmail(question.identityId)]])
+                User user = getUser(question.identityId)
+                Email email = new Email([subject: "Trevorism is prompting you to answer a question", body: buildEmailBody(created), recipients: [user.email]])
                 EndpointSpec endpointSpec = new EndpointSpec("https://email.action.trevorism.com/mail", HttpMethod.POST, gson.toJson(email))
-                ScheduledTask st = factory.createImmediateTask("testSched", oneDayBefore, endpointSpec)
+                ScheduledTask st = factory.createImmediateTask("prompt_email_${user.username}".toString(), oneDayBefore, endpointSpec)
                 scheduleService.create(st)
             }
         }
@@ -140,9 +141,9 @@ class QuestionController {
         """
     }
 
-    String getUserEmail(String id) {
+    User getUser(String id) {
         Repository<User> userRepository = new FastDatastoreRepository<>(User, secureHttpClient)
         User user = userRepository.get(id)
-        return user.email
+        return user
     }
 }

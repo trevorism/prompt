@@ -39,6 +39,11 @@ const answerFormVisible = ref(props.answerMode)
 const answerButtonVisible = ref(!props.answerMode)
 
 const handleSubmit = () => {
+  if (answerText.value.length === 0) {
+    errorMessage.value = 'Please enter an answer'
+    return
+  }
+
   answerFormVisible.value = false
   answerButtonVisible.value = false
   loading.value = true
@@ -50,6 +55,7 @@ const handleSubmit = () => {
       answerFormVisible.value = false
       answerButtonVisible.value = true
       answerText.value = ''
+      errorMessage.value = ''
       loading.value = false
       emit('answeredQuestion', answer.data)
     })
@@ -63,6 +69,7 @@ const handleSubmit = () => {
 
 const handleCancel = () => {
   answerText.value = ''
+  errorMessage.value = ''
   answerFormVisible.value = false
   answerButtonVisible.value = true
 }
