@@ -76,6 +76,20 @@ class DefaultEventPublishingServiceTest {
     }
 
     @Test
+    void publishEnsuresTopicsExactlyOnceAcrossMultiplePublishes() {
+        FakeChannelClient channelClient = new FakeChannelClient([])
+        DefaultEventPublishingService service = new DefaultEventPublishingService(new RecordingEventClient<>(), new RecordingEventClient<>(), channelClient)
+
+        service.publishQuestionAsked(new Question(id: "q1", text: "x"))
+        service.publishQuestionAsked(new Question(id: "q2", text: "y"))
+        service.publishQuestionAnswered(new Question(id: "q1"), new Answer(id: "a1"), "alice")
+
+        // Topics created once total, not per publish
+        assert channelClient.listTopicsCallCount == 1
+        assert channelClient.createdTopics == [DefaultEventPublishingService.QUESTION_ASKED_TOPIC, DefaultEventPublishingService.QUESTION_ANSWERED_TOPIC]
+    }
+
+    @Test
     void ensureTopicsCreatesOnlyMissingTopics() {
         FakeChannelClient channelClient = new FakeChannelClient([DefaultEventPublishingService.QUESTION_ASKED_TOPIC])
         DefaultEventPublishingService service = new DefaultEventPublishingService(new RecordingEventClient<>(), new RecordingEventClient<>(), channelClient)
@@ -114,13 +128,17 @@ class DefaultEventPublishingServiceTest {
     private static class FakeChannelClient implements ChannelClient {
         List<String> existingTopics
         List<String> createdTopics = []
+        int listTopicsCallCount = 0
 
         FakeChannelClient(List<String> existingTopics) {
             this.existingTopics = existingTopics
         }
 
         @Override
-        List<String> listTopics() { existingTopics }
+        List<String> listTopics() {
+            listTopicsCallCount++
+            existingTopics
+        }
 
         @Override
         String createTopic(String name) {
