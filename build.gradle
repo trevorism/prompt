@@ -25,6 +25,7 @@ plugins {
     id("groovy")
     id("com.gradleup.shadow") version "9.4.1"
     id("io.micronaut.application") version "5.0.0"
+    id("com.github.node-gradle.node") version "7.0.2"
     id("jacoco")
 }
 
@@ -97,32 +98,44 @@ appengine {
     }
 }
 
-def appDir = file("${project.projectDir}/src/app")
-
-task installNodeDependencies(type: Exec) {
-    group = "npm"
-    workingDir appDir
-    commandLine 'npm', 'install'
+node{
+    nodeProjectDir = file("${project.projectDir}/src/app")
 }
 
-task buildApp(type: Exec) {
+test {
+    systemProperty ("trevorism.test.event", findProperty("trevorism.test.event") == "enabled" ? project.name : null)
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.0
+            }
+        }
+    }
+}
+
+task installNodeDependencies(type: NpmTask) {
+    group = "npm"
+    args = ['install']
+}
+
+task buildApp(type: NpmTask) {
     dependsOn('installNodeDependencies')
     outputs.dir("src/app/dist")
     group = "npm"
-    workingDir appDir
-    commandLine 'npm', 'run', 'build'
+    args = ['run', 'build']
 }
 
-task testApp(type: Exec) {
+task testApp(type: NpmTask) {
     group = "npm"
-    workingDir appDir
-    commandLine 'npm', 'run', 'accept'
+    args = ['run', 'accept']
 }
 
-task runApp(type: Exec) {
+task runApp(type: NpmTask) {
     group = "npm"
-    workingDir appDir
-    commandLine 'npm', 'run', 'dev'
+    args = ['run','dev']
 }
 
 task copyFrontEnd(type: Copy){
@@ -132,6 +145,7 @@ task copyFrontEnd(type: Copy){
     into layout.buildDirectory.dir("resources/main/public")
 }
 
+
 jar.dependsOn("copyFrontEnd")
 run.dependsOn("copyFrontEnd")
 buildLayers.dependsOn("copyFrontEnd")
@@ -139,3 +153,4 @@ shadowJar.dependsOn("copyFrontEnd")
 compileTestGroovy.mustRunAfter('copyFrontEnd')
 compileAcceptanceGroovy.mustRunAfter('copyFrontEnd')
 build.dependsOn jacocoTestCoverageVerification
+
