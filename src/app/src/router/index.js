@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import mixpanel from 'mixpanel-browser'
 import Splash from '../views/Splash.vue'
 import AskQuestion from '../views/AskQuestion.vue'
 import SingleQuestion from '../views/SingleQuestion.vue';
@@ -24,10 +23,6 @@ const router = createRouter({
       props: true
     },
   ]
-})
-
-router.afterEach((to) => {
-  mixpanel.track(to.fullPath)
 })
 
 export default router
