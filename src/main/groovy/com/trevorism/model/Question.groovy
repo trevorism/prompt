@@ -12,4 +12,5 @@ class Question {
     String targetIdentityId
     Date dueDate
     boolean privateQuestion
+    String kind
 }

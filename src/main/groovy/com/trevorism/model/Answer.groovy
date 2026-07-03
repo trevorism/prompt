@@ -7,5 +7,6 @@ class Answer {
     String questionId
     String text
     String identityId
+    Boolean approved
     Map metadata
 }

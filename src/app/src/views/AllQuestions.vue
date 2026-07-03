@@ -47,11 +47,12 @@ export default {
           :date="item.question.createDate"
           :user="item.question.username"
           :text="item.question.text"
+          :kind="item.question.kind"
           :answerMode="false"
           @answeredQuestion="appendAnsweredQuestion"
         ></question>
         <div v-for="answer in item.answers">
-          <answer :date="answer.answeredDate" :user="answer.username" :text="answer.text"></answer>
+          <answer :date="answer.answeredDate" :user="answer.username" :text="answer.text" :approved="answer.approved"></answer>
         </div>
       </div>
     </div>

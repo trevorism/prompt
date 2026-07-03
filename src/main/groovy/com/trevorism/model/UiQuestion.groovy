@@ -7,5 +7,6 @@ class UiQuestion {
     Date createDate
     boolean answered
     String username
+    String kind
 
 }

@@ -11,6 +11,11 @@ defineProps({
   date: {
     type: Number,
     required: true
+  },
+  approved: {
+    type: Boolean,
+    required: false,
+    default: null
   }
 })
 
@@ -22,6 +27,8 @@ const formatDate = (date) => {
 <template>
   <va-card class="border border-green-400 ml-16 mt-4 mb-4 mr-4">
     <va-card-content class="text-base">
+      <va-chip v-if="approved === true" color="success" size="small" class="mr-2">Approved</va-chip>
+      <va-chip v-if="approved === false" color="danger" size="small" class="mr-2">Rejected</va-chip>
       {{ text }}
     </va-card-content>
     <va-divider></va-divider>

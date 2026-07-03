@@ -7,5 +7,6 @@ class UiAnswer {
     String questionId
     String text
     String username
+    Boolean approved
     Map metadata
 }

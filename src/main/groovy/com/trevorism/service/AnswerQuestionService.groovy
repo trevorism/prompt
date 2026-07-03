@@ -43,7 +43,7 @@ class AnswerQuestionService implements AnswerService {
         eventPublishingService.publishQuestionAnswered(question, created, username)
 
         return new UiAnswer(id: created.id, answeredDate: created.answeredDate, questionId: created.questionId,
-                text: created.text, username: username)
+                text: created.text, username: username, approved: created.approved)
     }
 
     @Override
@@ -63,7 +63,7 @@ class AnswerQuestionService implements AnswerService {
                 .sort { a, b -> b.createDate <=> a.createDate }
                 .collect { Question question ->
                     new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                            answered: question.answered, username: findMatchingUsername(users, question))
+                            answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind)
                 }
         return questions
     }
@@ -84,7 +84,7 @@ class AnswerQuestionService implements AnswerService {
                 .sort { a, b -> b.createDate <=> a.createDate }
                 .collect { Question question ->
                     new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                            answered: question.answered, username: findMatchingUsername(users, question))
+                            answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind)
                 }
         return questions
     }
@@ -99,7 +99,7 @@ class AnswerQuestionService implements AnswerService {
         List<User> users = userRepository.list()
         Question question = questionRepository.get(id)
         return new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                answered: question.answered, username: findMatchingUsername(users, question))
+                answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind)
     }
 
     private ArrayList<QuestionListItem> appendAnswersToQuestions(List<Question> questions) {
@@ -117,7 +117,7 @@ class AnswerQuestionService implements AnswerService {
     private static QuestionListItem createQuestionListItem(Question question, List<Answer> answers, List<User> users) {
         QuestionListItem item = new QuestionListItem()
         item.question = new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                answered: question.answered, username: findMatchingUsername(users, question))
+                answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind)
         item.answers = answers.findAll { it.questionId == question.id }
                 .sort { a, b -> b.answeredDate <=> a.answeredDate }
                 .collect { Answer answer ->
@@ -126,7 +126,7 @@ class AnswerQuestionService implements AnswerService {
                         username = "Chat GPT"
 
                     new UiAnswer(id: answer.id, answeredDate: answer.answeredDate, questionId: answer.questionId,
-                            text: answer.text, username: username)
+                            text: answer.text, username: username, approved: answer.approved)
                 }
         return item
     }

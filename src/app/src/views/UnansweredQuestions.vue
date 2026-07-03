@@ -47,10 +47,11 @@ export default {
           :date="question.createDate"
           :user="question.username"
           :text="question.text"
+          :kind="question.kind"
           :answerMode="true"
           @answeredQuestion="setAnswer"
         ></question>
-        <answer v-if="answered" :date="answer.answeredDate" :user="answer.username" :text="answer.text"></answer>
+        <answer v-if="answered" :date="answer.answeredDate" :user="answer.username" :text="answer.text" :approved="answer.approved"></answer>
       </div>
     </div>
     <div v-else>You must login to view all unanswered questions.</div>

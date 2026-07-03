@@ -11,6 +11,7 @@ export default {
       text: '',
       askChatGpt: false,
       privateQuestion: false,
+      requestApproval: false,
       collapsed: false,
       askUser: '',
       userOptions: [],
@@ -25,6 +26,10 @@ export default {
         this.errorMessage = 'Please enter a question'
         return
       }
+      if (this.requestApproval && !this.askUser) {
+        this.errorMessage = 'Select an approver for an approval request'
+        return
+      }
       this.errorMessage = ''
       const dueDateISO = this.dueDate ? new Date(this.dueDate).toISOString() : null;
       this.loading = true
@@ -34,7 +39,8 @@ export default {
           askChatGpt: this.askChatGpt,
           targetIdentityId: this.askUser,
           privateQuestion: this.privateQuestion,
-          dueDate: dueDateISO
+          dueDate: dueDateISO,
+          kind: this.requestApproval ? 'approval' : 'question'
         })
         .then(() => {
           this.errorMessage = ''
@@ -82,6 +88,7 @@ export default {
             <div class="w-1/2"><VaCheckbox class="mt-4 w-full" v-model="askChatGpt" label="Ask Chat-GPT?" /></div>
             <div class="w-1/2"><VaSelect class="mt-4 w-full" v-model="askUser" label="Ask Specific User" :options="userOptions" text-by="username" value-by="id" @update:modelValue="handleSelectChange" /></div>
             <div class="w-1/2"><VaCheckbox class="mt-4 w-full" v-model="privateQuestion" label="Should the question be private to the selected user?" /></div>
+            <div class="w-1/2"><VaCheckbox class="mt-4 w-full" v-model="requestApproval" label="Request approval? (the selected user responds Approve/Reject)" /></div>
             <div class="w-1/2 mt-4">Due Date: <va-date-input v-model="dueDate" mode="single" /> <va-chip color="warning" @click="clearDate">Clear</va-chip></div>
           </div>
         </VaCollapse>

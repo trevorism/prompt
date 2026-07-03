@@ -44,6 +44,7 @@ const answerSingleQuestion = () => {
           :date="question.data.createDate"
           :user="question.data.username"
           :text="question.data.text"
+          :kind="question.data.kind"
           :answerMode="true"
           @answeredQuestion="answerSingleQuestion"
       ></question>
