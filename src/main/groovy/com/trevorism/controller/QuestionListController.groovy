@@ -56,6 +56,6 @@ class QuestionListController {
     @Get(value = "/{id}", produces = MediaType.APPLICATION_JSON)
     @Secure(Roles.USER)
     UiQuestion getSingleQuestion(String id, Authentication authentication) {
-        answerService.getQuestion(id)
+        answerService.getQuestion(id, authentication.getAttributes().get("id") as String, authentication.getRoles())
     }
 }

@@ -16,5 +16,10 @@ interface AnswerService {
     List<UiQuestion> getPendingQuestions(String identityId)
     List<User> getActiveUsers()
 
-    UiQuestion getQuestion(String id)
+    UiQuestion getQuestion(String id, String requesterId, Collection<String> requesterRoles)
+
+    List<Answer> listVisibleAnswers(String requesterId, Collection<String> requesterRoles)
+    Answer getAnswer(String id, String requesterId, Collection<String> requesterRoles)
+    Answer updateAnswer(String id, Answer answer, String requesterId, Collection<String> requesterRoles)
+    boolean deleteAnswer(String id, String requesterId, Collection<String> requesterRoles)
 }

@@ -1,25 +1,34 @@
 package com.trevorism.service
 
-import com.trevorism.data.FastDatastoreRepository
 import com.trevorism.data.Repository
 import com.trevorism.data.model.filtering.FilterBuilder
 import com.trevorism.data.model.filtering.FilterConstants
 import com.trevorism.data.model.filtering.SimpleFilter
-import com.trevorism.https.SecureHttpClient
 import com.trevorism.model.*
+import io.micronaut.http.HttpStatus
+import io.micronaut.http.exceptions.HttpStatusException
+import jakarta.inject.Named
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 @jakarta.inject.Singleton
 class AnswerQuestionService implements AnswerService {
+
+    private static final Logger log = LoggerFactory.getLogger(AnswerQuestionService.class.name)
 
     private Repository<Answer> answerRepository
     private Repository<Question> questionRepository
     private Repository<User> userRepository
     private EventPublishingService eventPublishingService
 
-    AnswerQuestionService(SecureHttpClient secureHttpClient, EventPublishingService eventPublishingService) {
-        this.answerRepository = new FastDatastoreRepository<>(Answer, secureHttpClient)
-        this.questionRepository = new FastDatastoreRepository<>(Question, secureHttpClient)
-        this.userRepository = new FastDatastoreRepository<>(User, secureHttpClient)
+    AnswerQuestionService(
+            @Named("answer") Repository<Answer> answerRepository,
+            @Named("question") Repository<Question> questionRepository,
+            @Named("user") Repository<User> userRepository,
+            EventPublishingService eventPublishingService) {
+        this.answerRepository = answerRepository
+        this.questionRepository = questionRepository
+        this.userRepository = userRepository
         this.eventPublishingService = eventPublishingService
     }
 
@@ -95,11 +104,58 @@ class AnswerQuestionService implements AnswerService {
     }
 
     @Override
-    UiQuestion getQuestion(String id) {
-        List<User> users = userRepository.list()
+    UiQuestion getQuestion(String id, String requesterId, Collection<String> requesterRoles) {
         Question question = questionRepository.get(id)
+        if (question == null || !QuestionVisibility.canView(question, requesterId, requesterRoles))
+            throw new HttpStatusException(HttpStatus.NOT_FOUND, "Question not found")
+
+        List<User> users = userRepository.list()
         return new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
                 answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind)
+    }
+
+    @Override
+    List<Answer> listVisibleAnswers(String requesterId, Collection<String> requesterRoles) {
+        Map<String, Question> questionsById = questionRepository.list().collectEntries { [(it.id): it] }
+        answerRepository.list().findAll { AnswerVisibility.canView(it, questionsById[it.questionId], requesterId, requesterRoles) }
+    }
+
+    @Override
+    Answer getAnswer(String id, String requesterId, Collection<String> requesterRoles) {
+        Answer answer = answerRepository.get(id)
+        if (answer == null || !canViewAnswer(answer, requesterId, requesterRoles))
+            throw new HttpStatusException(HttpStatus.NOT_FOUND, "Answer not found")
+        return answer
+    }
+
+    @Override
+    Answer updateAnswer(String id, Answer answer, String requesterId, Collection<String> requesterRoles) {
+        authorizeAnswerModify(id, requesterId, requesterRoles)
+        try {
+            return answerRepository.update(id, answer)
+        } catch (Exception e) {
+            log.error("Unable to update answer", e)
+            throw new RuntimeException("Unable to update due to: ${e.message}")
+        }
+    }
+
+    @Override
+    boolean deleteAnswer(String id, String requesterId, Collection<String> requesterRoles) {
+        authorizeAnswerModify(id, requesterId, requesterRoles)
+        answerRepository.delete(id)
+    }
+
+    private boolean canViewAnswer(Answer answer, String requesterId, Collection<String> requesterRoles) {
+        Question question = answer.questionId ? questionRepository.get(answer.questionId) : null
+        AnswerVisibility.canView(answer, question, requesterId, requesterRoles)
+    }
+
+    private void authorizeAnswerModify(String id, String requesterId, Collection<String> requesterRoles) {
+        Answer existing = answerRepository.get(id)
+        if (existing == null || !canViewAnswer(existing, requesterId, requesterRoles))
+            throw new HttpStatusException(HttpStatus.NOT_FOUND, "Answer not found")
+        if (!AnswerVisibility.canModify(existing, requesterId, requesterRoles))
+            throw new HttpStatusException(HttpStatus.FORBIDDEN, "Not allowed to modify this answer")
     }
 
     private ArrayList<QuestionListItem> appendAnswersToQuestions(List<Question> questions) {
