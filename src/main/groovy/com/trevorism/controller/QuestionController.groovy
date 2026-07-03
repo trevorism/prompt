@@ -1,16 +1,12 @@
 package com.trevorism.controller
 
-import com.google.gson.Gson
-import com.trevorism.data.FastDatastoreRepository
 import com.trevorism.data.PingingDatastoreRepository
 import com.trevorism.data.Repository
 import com.trevorism.https.SecureHttpClient
 import com.trevorism.model.Answer
 import com.trevorism.model.ChatGptMessage
-import com.trevorism.model.Email
 import com.trevorism.model.Question
 import com.trevorism.model.UiAnswer
-import com.trevorism.model.User
 import com.trevorism.schedule.DefaultScheduleService
 import com.trevorism.schedule.ScheduleService
 import com.trevorism.schedule.factory.DefaultScheduledTaskFactory
@@ -22,6 +18,7 @@ import com.trevorism.secure.Roles
 import com.trevorism.secure.Secure
 import com.trevorism.service.AnswerService
 import com.trevorism.service.EventPublishingService
+import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.*
 import io.micronaut.security.authentication.Authentication
@@ -30,8 +27,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.inject.Inject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
-import java.time.temporal.ChronoUnit
 
 @Controller("/api/question")
 class QuestionController {
@@ -73,18 +68,14 @@ class QuestionController {
         }
 
 
-        if (question.dueDate) {
-            Date oneDayBefore = Date.from(question.dueDate.toInstant().minus(1, ChronoUnit.DAYS))
-            if(oneDayBefore.after(new Date())) {
-                ScheduleService scheduleService = new DefaultScheduleService(secureHttpClient)
-                ScheduledTaskFactory factory = new DefaultScheduledTaskFactory()
-                Gson gson = new Gson()
-                User user = getUser(question.identityId)
-                Email email = new Email([subject: "Trevorism is prompting you to answer a question", body: buildEmailBody(created), recipients: [user.email]])
-                EndpointSpec endpointSpec = new EndpointSpec("https://email.action.trevorism.com/mail", HttpMethod.POST, gson.toJson(email))
-                ScheduledTask st = factory.createImmediateTask("prompt_email_${user.username}".toString(), oneDayBefore, endpointSpec)
-                scheduleService.create(st)
-            }
+        if (created.dueDate && created.dueDate.after(new Date())) {
+            ScheduleService scheduleService = new DefaultScheduleService(secureHttpClient)
+            ScheduledTaskFactory factory = new DefaultScheduledTaskFactory()
+            EndpointSpec endpointSpec = new EndpointSpec("https://prompt.action.trevorism.com/api/question/${created.id}/duedate/callback".toString(), HttpMethod.POST, "{}")
+            ScheduledTask st = factory.createImmediateTask("prompt_due_${created.id}".toString(), created.dueDate, endpointSpec)
+            scheduleService.create(st)
+        } else if (created.dueDate) {
+            log.debug("Due date ${created.dueDate} is not in the future; no overdue callback scheduled for question ${created.id}")
         }
         return created
     }
@@ -136,20 +127,17 @@ class QuestionController {
         answerService.answerQuestion(id, answer, identityId)
     }
 
-    private static String buildEmailBody(Question question) {
-        return """Trevorism is prompting you to answer a question. The question is:
-        
-        ${question.text}
-        
-        This notification is being sent because the answer is being requested by ${question.dueDate}
-
-        Please answer it here: https://prompt.action.trevorism.com/answer/${question.id}
-        """
-    }
-
-    User getUser(String id) {
-        Repository<User> userRepository = new FastDatastoreRepository<>(User, secureHttpClient)
-        User user = userRepository.get(id)
-        return user
+    @Tag(name = "Question Operations")
+    @Operation(summary = "Callback invoked by the schedule service at a question's due date **Secure")
+    @Post(value = "{id}/duedate/callback")
+    @Secure(Roles.INTERNAL)
+    HttpResponse<?> dueDateCallback(String id) {
+        Question question = repository.get(id)
+        if (question != null && !question.answered && !question.overdueNotified) {
+            eventPublishingService.publishQuestionOverdue(question)
+            question.overdueNotified = true
+            repository.update(id, question)
+        }
+        return HttpResponse.ok()
     }
 }

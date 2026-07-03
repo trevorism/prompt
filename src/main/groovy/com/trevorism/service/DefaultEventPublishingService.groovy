@@ -4,10 +4,12 @@ import com.trevorism.event.ChannelClient
 import com.trevorism.event.EventClient
 import com.trevorism.model.Answer
 import com.trevorism.model.ApprovalDecidedEvent
+import com.trevorism.model.ApprovalExpiredEvent
 import com.trevorism.model.ApprovalRequestedEvent
 import com.trevorism.model.Question
 import com.trevorism.model.QuestionAnsweredEvent
 import com.trevorism.model.QuestionAskedEvent
+import com.trevorism.model.QuestionOverdueEvent
 import jakarta.inject.Named
 import jakarta.inject.Singleton
 import org.slf4j.Logger
@@ -20,6 +22,8 @@ class DefaultEventPublishingService implements EventPublishingService {
     static final String QUESTION_ANSWERED_TOPIC = "questionAnswered"
     static final String APPROVAL_REQUESTED_TOPIC = "approvalRequested"
     static final String APPROVAL_DECIDED_TOPIC = "approvalDecided"
+    static final String QUESTION_OVERDUE_TOPIC = "questionOverdue"
+    static final String APPROVAL_EXPIRED_TOPIC = "approvalExpired"
     static final String APPROVAL_KIND = "approval"
 
     private static final Logger log = LoggerFactory.getLogger(DefaultEventPublishingService.class.name)
@@ -28,6 +32,8 @@ class DefaultEventPublishingService implements EventPublishingService {
     private final EventClient<QuestionAnsweredEvent> questionAnsweredEventClient
     private final EventClient<ApprovalRequestedEvent> approvalRequestedEventClient
     private final EventClient<ApprovalDecidedEvent> approvalDecidedEventClient
+    private final EventClient<QuestionOverdueEvent> questionOverdueEventClient
+    private final EventClient<ApprovalExpiredEvent> approvalExpiredEventClient
     private final ChannelClient channelClient
     private volatile boolean topicsEnsured = false
 
@@ -36,11 +42,15 @@ class DefaultEventPublishingService implements EventPublishingService {
             @Named("questionAnswered") EventClient<QuestionAnsweredEvent> questionAnsweredEventClient,
             @Named("approvalRequested") EventClient<ApprovalRequestedEvent> approvalRequestedEventClient,
             @Named("approvalDecided") EventClient<ApprovalDecidedEvent> approvalDecidedEventClient,
+            @Named("questionOverdue") EventClient<QuestionOverdueEvent> questionOverdueEventClient,
+            @Named("approvalExpired") EventClient<ApprovalExpiredEvent> approvalExpiredEventClient,
             ChannelClient channelClient) {
         this.questionAskedEventClient = questionAskedEventClient
         this.questionAnsweredEventClient = questionAnsweredEventClient
         this.approvalRequestedEventClient = approvalRequestedEventClient
         this.approvalDecidedEventClient = approvalDecidedEventClient
+        this.questionOverdueEventClient = questionOverdueEventClient
+        this.approvalExpiredEventClient = approvalExpiredEventClient
         this.channelClient = channelClient
     }
 
@@ -79,6 +89,22 @@ class DefaultEventPublishingService implements EventPublishingService {
         publish(questionAnsweredEventClient, QUESTION_ANSWERED_TOPIC, event)
     }
 
+    @Override
+    void publishQuestionOverdue(Question question) {
+        ensureTopicsOnce()
+        if (isApproval(question)) {
+            ApprovalExpiredEvent event = new ApprovalExpiredEvent(questionId: question.id, text: question.text,
+                    requesterIdentityId: question.identityId, approverIdentityId: question.targetIdentityId,
+                    dueDate: question.dueDate)
+            publish(approvalExpiredEventClient, APPROVAL_EXPIRED_TOPIC, event)
+            return
+        }
+        QuestionOverdueEvent event = new QuestionOverdueEvent(questionId: question.id, text: question.text,
+                askerIdentityId: question.identityId, targetIdentityId: question.targetIdentityId,
+                dueDate: question.dueDate)
+        publish(questionOverdueEventClient, QUESTION_OVERDUE_TOPIC, event)
+    }
+
     private static boolean isApproval(Question question) {
         APPROVAL_KIND == question?.kind
     }
@@ -86,7 +112,8 @@ class DefaultEventPublishingService implements EventPublishingService {
     void ensureTopics() {
         try {
             List<String> topics = channelClient.listTopics()
-            [QUESTION_ASKED_TOPIC, QUESTION_ANSWERED_TOPIC, APPROVAL_REQUESTED_TOPIC, APPROVAL_DECIDED_TOPIC].each { String topic ->
+            [QUESTION_ASKED_TOPIC, QUESTION_ANSWERED_TOPIC, APPROVAL_REQUESTED_TOPIC, APPROVAL_DECIDED_TOPIC,
+             QUESTION_OVERDUE_TOPIC, APPROVAL_EXPIRED_TOPIC].each { String topic ->
                 if (!topics.contains(topic)) {
                     channelClient.createTopic(topic)
                 }

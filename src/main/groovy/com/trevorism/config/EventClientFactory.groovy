@@ -6,9 +6,11 @@ import com.trevorism.event.DefaultEventClient
 import com.trevorism.event.EventClient
 import com.trevorism.https.SecureHttpClient
 import com.trevorism.model.ApprovalDecidedEvent
+import com.trevorism.model.ApprovalExpiredEvent
 import com.trevorism.model.ApprovalRequestedEvent
 import com.trevorism.model.QuestionAnsweredEvent
 import com.trevorism.model.QuestionAskedEvent
+import com.trevorism.model.QuestionOverdueEvent
 import io.micronaut.context.annotation.Factory
 import jakarta.inject.Named
 import jakarta.inject.Singleton
@@ -38,6 +40,18 @@ class EventClientFactory {
     @Named("approvalDecided")
     EventClient<ApprovalDecidedEvent> approvalDecidedEventClient(SecureHttpClient secureHttpClient) {
         new DefaultEventClient<ApprovalDecidedEvent>(secureHttpClient)
+    }
+
+    @Singleton
+    @Named("questionOverdue")
+    EventClient<QuestionOverdueEvent> questionOverdueEventClient(SecureHttpClient secureHttpClient) {
+        new DefaultEventClient<QuestionOverdueEvent>(secureHttpClient)
+    }
+
+    @Singleton
+    @Named("approvalExpired")
+    EventClient<ApprovalExpiredEvent> approvalExpiredEventClient(SecureHttpClient secureHttpClient) {
+        new DefaultEventClient<ApprovalExpiredEvent>(secureHttpClient)
     }
 
     @Singleton

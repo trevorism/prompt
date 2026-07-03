@@ -8,4 +8,6 @@ interface EventPublishingService {
     void publishQuestionAsked(Question question)
 
     void publishQuestionAnswered(Question question, Answer answer, String answererUsername)
+
+    void publishQuestionOverdue(Question question)
 }

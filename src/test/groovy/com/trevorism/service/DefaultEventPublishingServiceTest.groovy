@@ -5,10 +5,12 @@ import com.trevorism.event.EventClient
 import com.trevorism.event.model.EventSubscription
 import com.trevorism.model.Answer
 import com.trevorism.model.ApprovalDecidedEvent
+import com.trevorism.model.ApprovalExpiredEvent
 import com.trevorism.model.ApprovalRequestedEvent
 import com.trevorism.model.Question
 import com.trevorism.model.QuestionAnsweredEvent
 import com.trevorism.model.QuestionAskedEvent
+import com.trevorism.model.QuestionOverdueEvent
 import org.junit.jupiter.api.Test
 
 class DefaultEventPublishingServiceTest {
@@ -105,6 +107,46 @@ class DefaultEventPublishingServiceTest {
     }
 
     @Test
+    void publishQuestionOverdueRoutesToQuestionOverdueTopic() {
+        Fixture f = new Fixture()
+
+        Date due = new Date()
+        Question question = new Question(id: "q1", text: "Deploy?", identityId: "asker1",
+                targetIdentityId: "target1", dueDate: due)
+
+        f.service.publishQuestionOverdue(question)
+
+        assert f.approvalExpired.topic == null
+        assert f.overdue.topic == DefaultEventPublishingService.QUESTION_OVERDUE_TOPIC
+        QuestionOverdueEvent payload = f.overdue.payload
+        assert payload.questionId == "q1"
+        assert payload.text == "Deploy?"
+        assert payload.askerIdentityId == "asker1"
+        assert payload.targetIdentityId == "target1"
+        assert payload.dueDate == due
+    }
+
+    @Test
+    void publishQuestionOverdueForApprovalRoutesToApprovalExpiredTopic() {
+        Fixture f = new Fixture()
+
+        Date due = new Date()
+        Question question = new Question(id: "q1", text: "Deploy prod?", identityId: "requester1",
+                targetIdentityId: "approver1", kind: "approval", dueDate: due)
+
+        f.service.publishQuestionOverdue(question)
+
+        assert f.overdue.topic == null
+        assert f.approvalExpired.topic == DefaultEventPublishingService.APPROVAL_EXPIRED_TOPIC
+        ApprovalExpiredEvent payload = f.approvalExpired.payload
+        assert payload.questionId == "q1"
+        assert payload.text == "Deploy prod?"
+        assert payload.requesterIdentityId == "requester1"
+        assert payload.approverIdentityId == "approver1"
+        assert payload.dueDate == due
+    }
+
+    @Test
     void publishSwallowsEventClientFailure() {
         EventClient throwing = new EventClient() {
             @Override
@@ -113,13 +155,15 @@ class DefaultEventPublishingServiceTest {
             }
         }
         DefaultEventPublishingService service = new DefaultEventPublishingService(
-                throwing, throwing, throwing, throwing, new FakeChannelClient([]))
+                throwing, throwing, throwing, throwing, throwing, throwing, new FakeChannelClient([]))
 
         // None should propagate the exception
         service.publishQuestionAsked(new Question(id: "q1", text: "x"))
         service.publishQuestionAnswered(new Question(id: "q1"), new Answer(id: "a1"), "alice")
         service.publishQuestionAsked(new Question(id: "q2", text: "y", kind: "approval"))
         service.publishQuestionAnswered(new Question(id: "q2", kind: "approval"), new Answer(id: "a2", approved: false), "bob")
+        service.publishQuestionOverdue(new Question(id: "q3", text: "z"))
+        service.publishQuestionOverdue(new Question(id: "q4", text: "w", kind: "approval"))
     }
 
     @Test
@@ -132,11 +176,7 @@ class DefaultEventPublishingServiceTest {
 
         // Topics created once total, not per publish
         assert f.channel.listTopicsCallCount == 1
-        assert f.channel.createdTopics == [
-                DefaultEventPublishingService.QUESTION_ASKED_TOPIC,
-                DefaultEventPublishingService.QUESTION_ANSWERED_TOPIC,
-                DefaultEventPublishingService.APPROVAL_REQUESTED_TOPIC,
-                DefaultEventPublishingService.APPROVAL_DECIDED_TOPIC]
+        assert f.channel.createdTopics == ALL_TOPICS
     }
 
     @Test
@@ -147,7 +187,9 @@ class DefaultEventPublishingServiceTest {
 
         assert f.channel.createdTopics == [
                 DefaultEventPublishingService.QUESTION_ANSWERED_TOPIC,
-                DefaultEventPublishingService.APPROVAL_REQUESTED_TOPIC]
+                DefaultEventPublishingService.APPROVAL_REQUESTED_TOPIC,
+                DefaultEventPublishingService.QUESTION_OVERDUE_TOPIC,
+                DefaultEventPublishingService.APPROVAL_EXPIRED_TOPIC]
     }
 
     @Test
@@ -160,23 +202,35 @@ class DefaultEventPublishingServiceTest {
         }
         DefaultEventPublishingService service = new DefaultEventPublishingService(
                 new RecordingEventClient<>(), new RecordingEventClient<>(),
+                new RecordingEventClient<>(), new RecordingEventClient<>(),
                 new RecordingEventClient<>(), new RecordingEventClient<>(), throwing)
 
         // Should not propagate
         service.ensureTopics()
     }
 
+    private static final List<String> ALL_TOPICS = [
+            DefaultEventPublishingService.QUESTION_ASKED_TOPIC,
+            DefaultEventPublishingService.QUESTION_ANSWERED_TOPIC,
+            DefaultEventPublishingService.APPROVAL_REQUESTED_TOPIC,
+            DefaultEventPublishingService.APPROVAL_DECIDED_TOPIC,
+            DefaultEventPublishingService.QUESTION_OVERDUE_TOPIC,
+            DefaultEventPublishingService.APPROVAL_EXPIRED_TOPIC]
+
     private static class Fixture {
         RecordingEventClient<QuestionAskedEvent> asked = new RecordingEventClient<>()
         RecordingEventClient<QuestionAnsweredEvent> answered = new RecordingEventClient<>()
         RecordingEventClient<ApprovalRequestedEvent> approvalRequested = new RecordingEventClient<>()
         RecordingEventClient<ApprovalDecidedEvent> approvalDecided = new RecordingEventClient<>()
+        RecordingEventClient<QuestionOverdueEvent> overdue = new RecordingEventClient<>()
+        RecordingEventClient<ApprovalExpiredEvent> approvalExpired = new RecordingEventClient<>()
         FakeChannelClient channel
         DefaultEventPublishingService service
 
         Fixture(List<String> existingTopics = []) {
             channel = new FakeChannelClient(existingTopics)
-            service = new DefaultEventPublishingService(asked, answered, approvalRequested, approvalDecided, channel)
+            service = new DefaultEventPublishingService(asked, answered, approvalRequested, approvalDecided,
+                    overdue, approvalExpired, channel)
         }
     }
 

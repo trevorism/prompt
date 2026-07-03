@@ -13,4 +13,5 @@ class Question {
     Date dueDate
     boolean privateQuestion
     String kind
+    boolean overdueNotified
 }
