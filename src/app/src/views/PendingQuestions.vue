@@ -10,6 +10,10 @@ export default {
     endpoint: {
       type: String,
       default: '/api/list/pending'
+    },
+    emptyMessage: {
+      type: String,
+      default: 'Nothing here yet.'
     }
   },
   data() {
@@ -47,6 +51,7 @@ export default {
 <template>
   <div>
     <div v-if="authenticated">
+      <div v-if="questionList.length === 0" class="empty-state">{{ emptyMessage }}</div>
       <div v-for="question in questionList">
         <question
           :id="question.id"

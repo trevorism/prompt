@@ -9,6 +9,7 @@ import com.trevorism.model.ApprovalRequestedEvent
 import com.trevorism.model.Question
 import com.trevorism.model.QuestionAnsweredEvent
 import com.trevorism.model.QuestionAskedEvent
+import com.trevorism.model.QuestionKind
 import com.trevorism.model.QuestionOverdueEvent
 import jakarta.inject.Named
 import jakarta.inject.Singleton
@@ -24,7 +25,6 @@ class DefaultEventPublishingService implements EventPublishingService {
     static final String APPROVAL_DECIDED_TOPIC = "approvalDecided"
     static final String QUESTION_OVERDUE_TOPIC = "questionOverdue"
     static final String APPROVAL_EXPIRED_TOPIC = "approvalExpired"
-    static final String APPROVAL_KIND = "approval"
 
     private static final Logger log = LoggerFactory.getLogger(DefaultEventPublishingService.class.name)
 
@@ -106,7 +106,7 @@ class DefaultEventPublishingService implements EventPublishingService {
     }
 
     private static boolean isApproval(Question question) {
-        APPROVAL_KIND == question?.kind
+        QuestionKind.APPROVAL == question?.kind
     }
 
     void ensureTopics() {

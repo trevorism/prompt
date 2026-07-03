@@ -41,6 +41,7 @@ export default {
 <template>
   <div>
     <div v-if="authenticated">
+      <div v-if="questionList.length === 0" class="empty-state">No unanswered questions right now.</div>
       <div v-for="question in questionList">
         <question
           :id="question.id"

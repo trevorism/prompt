@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory
 @Singleton
 class DefaultQuestionService implements QuestionService {
 
-    static final String CHAT_GPT_IDENTITY = "Chat GPT"
-
     private static final Logger log = LoggerFactory.getLogger(DefaultQuestionService.class.name)
 
     private final Repository<Question> questionRepository
@@ -50,7 +48,7 @@ class DefaultQuestionService implements QuestionService {
 
         if (question.askChatGpt) {
             String answerText = chatService.ask(question.text)
-            answerService.answerQuestion(created.id, new Answer(text: answerText), CHAT_GPT_IDENTITY)
+            answerService.answerQuestion(created.id, new Answer(text: answerText), ChatService.CHAT_GPT_IDENTITY)
         }
 
         if (created.dueDate && created.dueDate.after(new Date()))

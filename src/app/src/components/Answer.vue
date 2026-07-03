@@ -25,17 +25,15 @@ const formatDate = (date) => {
 </script>
 
 <template>
-  <va-card class="border border-green-400 ml-16 mt-4 mb-4 mr-4">
-    <va-card-content class="text-base">
-      <va-chip v-if="approved === true" color="success" size="small" class="mr-2">Approved</va-chip>
-      <va-chip v-if="approved === false" color="danger" size="small" class="mr-2">Rejected</va-chip>
-      {{ text }}
-    </va-card-content>
-    <va-divider></va-divider>
-    <div class="text-right text-base mr-8">
-      <b>{{ user }}</b> answered on <b>{{ formatDate(date) }}</b>
+  <div class="ml-8 mb-4 bg-white rounded-lg border border-slate-200 border-l-4 border-l-emerald-400 shadow-sm p-4">
+    <div class="flex items-center gap-2">
+      <span class="kind-label">Answer</span>
+      <va-chip v-if="approved === true" color="success" size="small">Approved</va-chip>
+      <va-chip v-if="approved === false" color="danger" size="small">Rejected</va-chip>
     </div>
-  </va-card>
+    <p class="text-slate-800 mt-2 mb-2 whitespace-pre-line">{{ text }}</p>
+    <div class="meta"><b class="text-slate-600">{{ user }}</b> answered · {{ formatDate(date) }}</div>
+  </div>
 </template>
 
 <style scoped></style>

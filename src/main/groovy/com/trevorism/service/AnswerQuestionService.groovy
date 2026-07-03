@@ -46,8 +46,8 @@ class AnswerQuestionService implements AnswerService {
         questionRepository.update(questionId, question)
 
         String username = users.find({ it.id == created.identityId })?.username
-        if(identityId == "Chat GPT")
-            username = "Chat GPT"
+        if(identityId == ChatService.CHAT_GPT_IDENTITY)
+            username = ChatService.CHAT_GPT_IDENTITY
 
         eventPublishingService.publishQuestionAnswered(question, created, username)
 
@@ -100,7 +100,7 @@ class AnswerQuestionService implements AnswerService {
 
     @Override
     List<UiQuestion> getPendingApprovals(String identityId) {
-        getPendingQuestions(identityId).findAll { it.kind == "approval" }
+        getPendingQuestions(identityId).findAll { it.kind == QuestionKind.APPROVAL }
     }
 
     @Override
@@ -183,8 +183,8 @@ class AnswerQuestionService implements AnswerService {
                 .sort { a, b -> b.answeredDate <=> a.answeredDate }
                 .collect { Answer answer ->
                     String username = users.find({ it.id == answer.identityId })?.username
-                    if(answer.identityId == "Chat GPT")
-                        username = "Chat GPT"
+                    if(answer.identityId == ChatService.CHAT_GPT_IDENTITY)
+                        username = ChatService.CHAT_GPT_IDENTITY
 
                     new UiAnswer(id: answer.id, answeredDate: answer.answeredDate, questionId: answer.questionId,
                             text: answer.text, username: username, approved: answer.approved)

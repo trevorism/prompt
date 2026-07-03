@@ -70,7 +70,7 @@ class DefaultQuestionServiceTest {
 
         assert aiAnswers.size() == 1
         assert aiAnswers[0].text == "AI answer"
-        assert aiAnswers[0].identityId == DefaultQuestionService.CHAT_GPT_IDENTITY
+        assert aiAnswers[0].identityId == ChatService.CHAT_GPT_IDENTITY
     }
 
     @Test

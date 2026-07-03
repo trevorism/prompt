@@ -45,6 +45,7 @@ const emit = defineEmits(['answeredQuestion'])
 
 const isApproval = computed(() => props.kind === 'approval')
 const overdue = computed(() => props.dueDate && !props.answered && new Date(props.dueDate) < new Date())
+const accentClass = computed(() => (isApproval.value ? 'border-l-blue-500' : 'border-l-slate-300'))
 
 const formatDate = (date) => {
   return new Date(date).toLocaleString()
@@ -107,53 +108,45 @@ const showAnswerPrompt = () => {
 </script>
 
 <template>
-  <div>
-    <va-card class="border-double border-4 border-indigo-600 m-4">
-      <va-card-title>
-        {{ isApproval ? 'Approval Request' : 'Question' }}
-        <va-chip v-if="overdue" color="danger" size="small" class="ml-2">{{ isApproval ? 'Expired' : 'Overdue' }}</va-chip>
-      </va-card-title>
-      <va-card-content class="text-lg">
-        {{ text }}
-      </va-card-content>
-      <div class="text-right" v-if="answerButtonVisible">
-        <va-button color="primary" class="m-4" @click="showAnswerPrompt">{{ isApproval ? 'Review Approval' : 'Answer Question' }}</va-button>
+  <div class="bg-white rounded-lg border border-slate-200 border-l-4 shadow-sm p-5 mb-4" :class="accentClass">
+    <div class="flex items-center justify-between">
+      <span class="kind-label">{{ isApproval ? 'Approval' : 'Question' }}</span>
+      <va-chip v-if="overdue" color="danger" size="small">{{ isApproval ? 'Expired' : 'Overdue' }}</va-chip>
+    </div>
+
+    <p class="text-lg text-slate-800 mt-2 mb-3 whitespace-pre-line">{{ text }}</p>
+
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <span class="meta"><b class="text-slate-600">{{ user }}</b> · {{ formatDate(date) }}</span>
+      <va-button v-if="answerButtonVisible" preset="primary" size="small" @click="showAnswerPrompt">
+        {{ isApproval ? 'Review approval' : 'Answer' }}
+      </va-button>
+    </div>
+
+    <va-form v-if="answerFormVisible" class="mt-4">
+      <va-textarea
+        class="w-full"
+        v-model="answerText"
+        :label="isApproval ? 'Reason (optional)' : 'Your answer'"
+      />
+      <div v-if="errorMessage.length > 0" class="text-red-600 text-sm mt-1">{{ errorMessage }}</div>
+
+      <div v-if="isApproval" class="flex justify-end gap-2 mt-3">
+        <va-button color="success" size="small" @click="handleDecision(true)">
+          <va-inner-loading :loading="loading"> Approve </va-inner-loading>
+        </va-button>
+        <va-button color="danger" size="small" @click="handleDecision(false)">
+          <va-inner-loading :loading="loading"> Reject </va-inner-loading>
+        </va-button>
+        <va-button preset="secondary" size="small" @click="handleCancel"> Cancel </va-button>
       </div>
-      <va-divider></va-divider>
-      <div class="text-right text-base mr-8">
-        <b>{{ user }}</b> asked on <b>{{ formatDate(date) }}</b>
+      <div v-else class="flex justify-end gap-2 mt-3">
+        <va-button type="submit" color="primary" size="small" @click="handleSubmit">
+          <va-inner-loading :loading="loading"> Submit </va-inner-loading>
+        </va-button>
+        <va-button preset="secondary" size="small" @click="handleCancel"> Cancel </va-button>
       </div>
-      <va-form v-if="answerFormVisible">
-        <va-textarea
-          class="block p-4 w-full text-base text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500"
-          v-model="answerText"
-          :label="isApproval ? 'Reason (optional)' : 'Your Answer'"
-        >
-        </va-textarea>
-        <div class="text-center w-full">
-          <div v-if="errorMessage.length > 0" class="text-center text-red-600">{{ errorMessage }}</div>
-        </div>
-        <va-button-group v-if="isApproval" class="w-full my-2 flex justify-center space-x-4">
-          <va-button color="success" @click="handleDecision(true)">
-            <va-inner-loading :loading="loading"> Approve </va-inner-loading>
-          </va-button>
-          <va-button color="danger" @click="handleDecision(false)">
-            <va-inner-loading :loading="loading"> Reject </va-inner-loading>
-          </va-button>
-          <va-button preset="secondary" @click="handleCancel">
-            <va-inner-loading :loading="loading"> Cancel </va-inner-loading>
-          </va-button>
-        </va-button-group>
-        <va-button-group v-else class="w-full my-2 flex justify-center space-x-4">
-          <va-button type="submit" color="primary" @click="handleSubmit">
-            <va-inner-loading :loading="loading"> Submit </va-inner-loading>
-          </va-button>
-          <va-button color="danger" @click="handleCancel">
-            <va-inner-loading :loading="loading"> Cancel </va-inner-loading>
-          </va-button>
-        </va-button-group>
-      </va-form>
-    </va-card>
+    </va-form>
   </div>
 </template>
 

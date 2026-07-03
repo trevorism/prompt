@@ -1,1 +1,52 @@
 @import "tailwindcss";
+
+:root {
+  --page-bg: #f8fafc;   /* slate-50 */
+  --text: #1e293b;      /* slate-800 */
+  --muted: #64748b;     /* slate-500 */
+  --border: #e2e8f0;    /* slate-200 */
+  --accent: #2563eb;    /* blue-600 */
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--page-bg);
+  color: var(--text);
+  font-family: 'Source Sans Pro', system-ui, -apple-system, sans-serif;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+/* Centered content column shared across pages */
+.page-container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+/* Small uppercase label used for a card's kind (Question / Approval) */
+.kind-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* Quiet metadata line (who / when) */
+.meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Friendly placeholder when a list has nothing to show */
+.empty-state {
+  text-align: center;
+  color: var(--muted);
+  padding: 3rem 1rem;
+  font-size: 0.95rem;
+}

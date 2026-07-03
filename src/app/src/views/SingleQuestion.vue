@@ -38,6 +38,7 @@ const answerSingleQuestion = () => {
 <template>
   <div>
     <header-bar :local="false"></header-bar>
+    <div class="page-container">
     <div v-if="renderable">
       <question
           :id="question.data.id"
@@ -51,7 +52,8 @@ const answerSingleQuestion = () => {
           @answeredQuestion="answerSingleQuestion"
       ></question>
     </div>
-    <div v-else>You must login to view your question.</div>
+    <div v-else class="empty-state">You must login to view your question.</div>
+    </div>
   </div>
 </template>
 

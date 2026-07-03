@@ -73,45 +73,52 @@ export default {
 <template>
   <div>
     <header-bar :local="false"></header-bar>
-    <div class="container px-8">
-      <h1 class="text-xl font-bold text-center">What is your question?</h1>
+    <div class="page-container">
+      <h1 class="text-2xl font-bold text-slate-800 mb-1">Ask a question</h1>
+      <p class="meta mb-5">Direct it to a specific user, or ask the whole team.</p>
 
-      <va-form>
-        <va-textarea
-          class="block p-4 w-full text-base text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          v-model="text"
-          label="Your Question"
-        >
-        </va-textarea>
-        <VaCollapse v-model="collapsed" header="Advanced Options" >
-          <div class="border-2 border-gray-500 p-6">
-            <div class="w-1/2"><VaCheckbox class="mt-4 w-full" v-model="askChatGpt" label="Ask Chat-GPT?" /></div>
-            <div class="w-1/2"><VaSelect class="mt-4 w-full" v-model="askUser" label="Ask Specific User" :options="userOptions" text-by="username" value-by="id" @update:modelValue="handleSelectChange" /></div>
-            <div class="w-1/2"><VaCheckbox class="mt-4 w-full" v-model="privateQuestion" label="Should the question be private to the selected user?" /></div>
-            <div class="w-1/2"><VaCheckbox class="mt-4 w-full" v-model="requestApproval" label="Request approval? (the selected user responds Approve/Reject)" /></div>
-            <div class="w-1/2 mt-4">Due Date: <va-date-input v-model="dueDate" mode="single" /> <va-chip color="warning" @click="clearDate">Clear</va-chip></div>
+      <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+        <va-form>
+          <va-textarea class="w-full" v-model="text" label="Your question" :min-rows="3" />
+
+          <VaCollapse v-model="collapsed" header="Advanced options" class="mt-4">
+            <div class="grid gap-4 pt-3">
+              <VaSelect
+                class="max-w-sm"
+                v-model="askUser"
+                label="Ask a specific user"
+                :options="userOptions"
+                text-by="username"
+                value-by="id"
+                @update:modelValue="handleSelectChange"
+              />
+              <VaCheckbox v-model="privateQuestion" label="Private to the selected user" />
+              <VaCheckbox v-model="requestApproval" label="Request approval (they respond Approve / Reject)" />
+              <VaCheckbox v-model="askChatGpt" label="Also ask Chat-GPT" />
+              <div class="flex items-center gap-3">
+                <va-date-input class="max-w-xs" v-model="dueDate" label="Due date" mode="single" />
+                <va-button v-if="dueDate" preset="plain" size="small" @click="clearDate">Clear</va-button>
+              </div>
+            </div>
+          </VaCollapse>
+
+          <div v-if="errorMessage.length > 0" class="text-red-600 text-sm mt-3">{{ errorMessage }}</div>
+
+          <div class="flex justify-end gap-2 mt-6">
+            <va-button preset="secondary" to="/">Cancel</va-button>
+            <va-button type="submit" color="primary" @click="handleSubmit">
+              <va-inner-loading :loading="loading">Submit</va-inner-loading>
+            </va-button>
           </div>
-        </VaCollapse>
-
-
-        <div class="text-center w-full">
-          <div v-if="errorMessage.length > 0" class="text-center text-red-600">{{ errorMessage }}</div>
-        </div>
-        <va-button-group class="w-full my-2 flex justify-center space-x-4">
-          <va-button type="submit" color="primary" @click="handleSubmit">
-            <va-inner-loading :loading="loading">Submit</va-inner-loading>
-          </va-button>
-          <va-button color="danger" to="/">
-            <va-inner-loading :loading="loading">Cancel</va-inner-loading>
-          </va-button>
-        </va-button-group>
-      </va-form>
+        </va-form>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* Keep unchecked checkboxes visible on the white card (Vuestic's default box is white). */
 .va-checkbox {
-  --va-checkbox-background: lightgray;
+  --va-checkbox-background: #e2e8f0; /* slate-200 */
 }
 </style>
