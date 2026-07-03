@@ -9,7 +9,7 @@ import { useCookies } from 'vue3-cookies'
 
 const selectedTab = ref(0)
 const { cookies } = useCookies()
-const authenticated = ref(!!cookies.get('session'))
+const authenticated = ref(!!cookies.get('user_name'))
 </script>
 
 <template>

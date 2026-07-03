@@ -24,7 +24,7 @@ export default {
   mounted() {
     let self = this
     const { cookies } = useCookies()
-    self.authenticated = !!cookies.get('session')
+    self.authenticated = !!cookies.get('user_name')
 
     axios
       .get('/api/list/unanswered/')

@@ -16,7 +16,7 @@ const props = defineProps({
 
 const router = useRouter();
 const { cookies } = useCookies()
-const authenticated = ref(!!cookies.get('session'))
+const authenticated = ref(!!cookies.get('user_name'))
 const question = reactive({data: null});
 const renderable = ref(false)
 
