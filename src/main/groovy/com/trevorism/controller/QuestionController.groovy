@@ -21,6 +21,7 @@ import com.trevorism.schedule.model.ScheduledTask
 import com.trevorism.secure.Roles
 import com.trevorism.secure.Secure
 import com.trevorism.service.AnswerService
+import com.trevorism.service.EventPublishingService
 import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.*
 import io.micronaut.security.authentication.Authentication
@@ -42,6 +43,9 @@ class QuestionController {
     @Inject
     AnswerService answerService
 
+    @Inject
+    EventPublishingService eventPublishingService
+
     QuestionController(SecureHttpClient secureHttpClient) {
         this.secureHttpClient = secureHttpClient
         this.repository = new PingingDatastoreRepository<>(Question, secureHttpClient)
@@ -59,6 +63,8 @@ class QuestionController {
         question.answered = false
         question.identityId = authentication?.attributes?.get("id")
         Question created = repository.create(question)
+
+        eventPublishingService.publishQuestionAsked(created)
 
         if (question.askChatGpt) {
             String response = secureHttpClient.post("https://chat.action.trevorism.com/api/chat", new ChatGptMessage(message: question.text).toJson())

@@ -14,11 +14,13 @@ class AnswerQuestionService implements AnswerService {
     private Repository<Answer> answerRepository
     private Repository<Question> questionRepository
     private Repository<User> userRepository
+    private EventPublishingService eventPublishingService
 
-    AnswerQuestionService(SecureHttpClient secureHttpClient) {
+    AnswerQuestionService(SecureHttpClient secureHttpClient, EventPublishingService eventPublishingService) {
         this.answerRepository = new FastDatastoreRepository<>(Answer, secureHttpClient)
         this.questionRepository = new FastDatastoreRepository<>(Question, secureHttpClient)
         this.userRepository = new FastDatastoreRepository<>(User, secureHttpClient)
+        this.eventPublishingService = eventPublishingService
     }
 
     @Override
@@ -37,6 +39,8 @@ class AnswerQuestionService implements AnswerService {
         String username = users.find({ it.id == created.identityId })?.username
         if(identityId == "Chat GPT")
             username = "Chat GPT"
+
+        eventPublishingService.publishQuestionAnswered(question, created, username)
 
         return new UiAnswer(id: created.id, answeredDate: created.answeredDate, questionId: created.questionId,
                 text: created.text, username: username)
