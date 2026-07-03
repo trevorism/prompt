@@ -6,6 +6,12 @@ import { useCookies } from 'vue3-cookies'
 
 export default {
   components: { Answer, Question },
+  props: {
+    endpoint: {
+      type: String,
+      default: '/api/list/pending'
+    }
+  },
   data() {
     return {
       authenticated: false,
@@ -27,7 +33,7 @@ export default {
     self.authenticated = !!cookies.get('user_name')
 
     axios
-      .get('/api/list/pending')
+      .get(self.endpoint)
       .then((result) => {
         self.questionList = result.data
       })
@@ -48,6 +54,8 @@ export default {
           :user="question.username"
           :text="question.text"
           :kind="question.kind"
+          :due-date="question.dueDate"
+          :answered="question.answered"
           :answerMode="true"
           @answeredQuestion="setAnswer"
         ></question>

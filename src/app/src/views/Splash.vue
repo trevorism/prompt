@@ -28,6 +28,7 @@ const authenticated = ref(!!cookies.get('user_name'))
         </va-button>
       </div>
       <va-tabs v-model="selectedTab">
+        <va-tab> Approvals </va-tab>
         <va-tab> Need an Answer </va-tab>
         <va-tab> All Unanswered Questions </va-tab>
         <va-tab> My Questions </va-tab>
@@ -35,15 +36,18 @@ const authenticated = ref(!!cookies.get('user_name'))
       </va-tabs>
       <div class="border border-gray-300 rounded-xl p-6">
         <div v-if="selectedTab === 0">
-          <pending-questions />
+          <pending-questions endpoint="/api/list/approvals" />
         </div>
         <div v-if="selectedTab === 1">
-          <unanswered-questions />
+          <pending-questions />
         </div>
         <div v-if="selectedTab === 2">
-          <my-questions />
+          <unanswered-questions />
         </div>
         <div v-if="selectedTab === 3">
+          <my-questions />
+        </div>
+        <div v-if="selectedTab === 4">
           <all-questions />
         </div>
       </div>

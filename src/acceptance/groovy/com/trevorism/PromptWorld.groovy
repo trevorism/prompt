@@ -40,8 +40,6 @@ class PromptWorld {
     }
 
     Map fetchQuestion(String id) {
-        // Use the single-arg get: SecureHttpClientBase only injects the auth token via
-        // createHeaderMap() on the no-headers overloads; get(url, map) sends the map as-is (no auth).
         body = authClient.get("${BASE_URL}/api/question/${id}".toString())
         return gson.fromJson(body, Map)
     }

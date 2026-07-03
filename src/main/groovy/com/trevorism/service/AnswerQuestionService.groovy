@@ -72,7 +72,7 @@ class AnswerQuestionService implements AnswerService {
                 .sort { a, b -> b.createDate <=> a.createDate }
                 .collect { Question question ->
                     new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                            answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind)
+                            answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind, dueDate: question.dueDate)
                 }
         return questions
     }
@@ -93,9 +93,14 @@ class AnswerQuestionService implements AnswerService {
                 .sort { a, b -> b.createDate <=> a.createDate }
                 .collect { Question question ->
                     new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                            answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind)
+                            answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind, dueDate: question.dueDate)
                 }
         return questions
+    }
+
+    @Override
+    List<UiQuestion> getPendingApprovals(String identityId) {
+        getPendingQuestions(identityId).findAll { it.kind == "approval" }
     }
 
     @Override
@@ -111,7 +116,7 @@ class AnswerQuestionService implements AnswerService {
 
         List<User> users = userRepository.list()
         return new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind)
+                answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind, dueDate: question.dueDate)
     }
 
     @Override
@@ -173,7 +178,7 @@ class AnswerQuestionService implements AnswerService {
     private static QuestionListItem createQuestionListItem(Question question, List<Answer> answers, List<User> users) {
         QuestionListItem item = new QuestionListItem()
         item.question = new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind)
+                answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind, dueDate: question.dueDate)
         item.answers = answers.findAll { it.questionId == question.id }
                 .sort { a, b -> b.answeredDate <=> a.answeredDate }
                 .collect { Answer answer ->

@@ -48,6 +48,8 @@ export default {
           :user="question.username"
           :text="question.text"
           :kind="question.kind"
+          :due-date="question.dueDate"
+          :answered="question.answered"
           :answerMode="true"
           @answeredQuestion="setAnswer"
         ></question>

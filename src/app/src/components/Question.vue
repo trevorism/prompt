@@ -28,12 +28,23 @@ const props = defineProps({
     type: String,
     required: false,
     default: 'question'
+  },
+  dueDate: {
+    type: [Number, String],
+    required: false,
+    default: null
+  },
+  answered: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 })
 
 const emit = defineEmits(['answeredQuestion'])
 
 const isApproval = computed(() => props.kind === 'approval')
+const overdue = computed(() => props.dueDate && !props.answered && new Date(props.dueDate) < new Date())
 
 const formatDate = (date) => {
   return new Date(date).toLocaleString()
@@ -98,7 +109,10 @@ const showAnswerPrompt = () => {
 <template>
   <div>
     <va-card class="border-double border-4 border-indigo-600 m-4">
-      <va-card-title>{{ isApproval ? 'Approval Request' : 'Question' }}</va-card-title>
+      <va-card-title>
+        {{ isApproval ? 'Approval Request' : 'Question' }}
+        <va-chip v-if="overdue" color="danger" size="small" class="ml-2">{{ isApproval ? 'Expired' : 'Overdue' }}</va-chip>
+      </va-card-title>
       <va-card-content class="text-lg">
         {{ text }}
       </va-card-content>

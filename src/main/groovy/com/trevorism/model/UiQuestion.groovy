@@ -8,5 +8,6 @@ class UiQuestion {
     boolean answered
     String username
     String kind
+    Date dueDate
 
 }

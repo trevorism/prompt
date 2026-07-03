@@ -52,6 +52,14 @@ class QuestionListController {
     }
 
     @Tag(name = "App Operations")
+    @Operation(summary = "Get approvals awaiting the current user's decision **Secure")
+    @Get(value = "/approvals", produces = MediaType.APPLICATION_JSON)
+    @Secure(Roles.USER)
+    List<UiQuestion> approvals(Authentication authentication) {
+        answerService.getPendingApprovals(authentication.getAttributes().get("id"))
+    }
+
+    @Tag(name = "App Operations")
     @Operation(summary = "Get a list of all Question and Answers **Secure")
     @Get(value = "/{id}", produces = MediaType.APPLICATION_JSON)
     @Secure(Roles.USER)
