@@ -75,7 +75,7 @@ class QuestionController {
     @Tag(name = "Question Operations")
     @Operation(summary = "Callback invoked by the schedule service at a question's due date **Secure")
     @Post(value = "{id}/duedate/callback")
-    @Secure(Roles.INTERNAL)
+    @Secure(value = Roles.SYSTEM, allowInternal = true)
     HttpResponse<?> dueDateCallback(String id) {
         questionService.markOverdueIfUnanswered(id)
         return HttpResponse.ok()
