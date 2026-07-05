@@ -4,8 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 import fs from 'fs'
 import axios from 'axios'
 
-// Minimal, CRLF-safe .properties parser (properties-reader returned no keys for the
-// Windows-line-ending secrets file, leaving the local dev token empty).
 function readSecrets(path) {
   const out = {}
   try {

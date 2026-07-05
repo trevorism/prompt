@@ -9,6 +9,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "accept": "vitest run",
     "test:unit": "vitest",
     "test:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
     "test:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.16.1",
     "@trevorism/ui-header-bar": "^5.1.0",
+    "@trevorism/vitest-test-result-events": "^2.0.0",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/test-utils": "^2.4.11",

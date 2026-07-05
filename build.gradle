@@ -132,7 +132,8 @@ task buildApp(type: NpmTask) {
 }
 
 task testApp(type: NpmTask) {
-    group = "npm"
+    dependsOn('installNodeDependencies')
+    group = "verification"
     args = ['run', 'accept']
 }
 
@@ -155,5 +156,5 @@ buildLayers.dependsOn("copyFrontEnd")
 shadowJar.dependsOn("copyFrontEnd")
 compileTestGroovy.mustRunAfter('copyFrontEnd')
 compileAcceptanceGroovy.mustRunAfter('copyFrontEnd')
+check.dependsOn("testApp")
 build.dependsOn jacocoTestCoverageVerification
-
