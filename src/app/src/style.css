@@ -2,10 +2,8 @@
 
 :root {
   --page-bg: #f8fafc;   /* slate-50 */
-  --text: #1e293b;      /* slate-800 */
   --muted: #64748b;     /* slate-500 */
   --border: #e2e8f0;    /* slate-200 */
-  --accent: #2563eb;    /* blue-600 */
 }
 
 html,
@@ -13,8 +11,6 @@ body {
   margin: 0;
   padding: 0;
   background: var(--page-bg);
-  color: var(--text);
-  font-family: 'Source Sans Pro', system-ui, -apple-system, sans-serif;
 }
 
 #app {

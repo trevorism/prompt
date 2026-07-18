@@ -1,3 +1,7 @@
+## 1.0.0
+
+Update UI dependencies; this is releasable now.
+
 ## 0.9.0
 
 Upgraded to Micronaut 5.0.2, JDK 25, and latest dependencies:

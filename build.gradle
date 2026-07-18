@@ -23,7 +23,7 @@ buildscript {
 
 plugins {
     id("groovy")
-    id("com.gradleup.shadow") version "9.4.3"
+    id("com.gradleup.shadow") version "9.6.0"
     id("io.micronaut.application") version "5.0.2"
     id("com.github.node-gradle.node") version "7.1.0"
     id("jacoco")
@@ -113,7 +113,7 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = 0.0
+                minimum = 0.5
             }
         }
     }
