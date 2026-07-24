@@ -1,5 +1,7 @@
 package com.trevorism.gcloud
 
+import com.trevorism.PromptWorld
+
 /**
  * @author tbrooks
  */
@@ -12,16 +14,16 @@ def pingContent
 
 Given(~/^the prompt application is alive$/) { ->
     try{
-        new URL("https://prompt.action.trevorism.com/api/ping").text
+        new URL("${PromptWorld.BASE_URL}/api/ping").text
     }
     catch (Exception ignored){
         Thread.sleep(10000)
-        new URL("https://prompt.action.trevorism.com/api/ping").text
+        new URL("${PromptWorld.BASE_URL}/api/ping").text
     }
 }
 
 When(~/^I navigate to "([^"]*)"$/) { String url ->
-    contextRootContent = new URL("${url}/api").text
+    contextRootContent = new URL("${PromptWorld.BASE_URL}/api").text
 }
 
 Then(~/^then a link to the help page is displayed$/) { ->
@@ -30,7 +32,7 @@ Then(~/^then a link to the help page is displayed$/) { ->
 }
 
 When(~/^I ping the application deployed to "([^"]*)"$/) { String url ->
-    pingContent = new URL("${url}/api/ping").text
+    pingContent = new URL("${PromptWorld.BASE_URL}/api/ping").text
 }
 
 Then(~/^pong is returned, to indicate the service is alive$/) { ->

@@ -8,7 +8,7 @@ import com.trevorism.https.SecureHttpClient
 
 class PromptWorld {
 
-    static final String BASE_URL = "https://prompt.action.trevorism.com"
+    static final String BASE_URL = System.getenv("ACCEPTANCE_BASE_URL") ?: "https://prompt.action.trevorism.com"
     static final String MARKER = "[acceptance]"
 
     private final Gson gson = new Gson()
