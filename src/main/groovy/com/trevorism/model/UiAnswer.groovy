@@ -9,4 +9,5 @@ class UiAnswer {
     String username
     Boolean approved
     Map metadata
+    List<String> selectedChoices = []
 }

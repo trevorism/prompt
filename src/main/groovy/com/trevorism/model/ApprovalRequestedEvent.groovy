@@ -7,4 +7,6 @@ class ApprovalRequestedEvent {
     String requesterIdentityId
     String approverIdentityId
     Date createDate
+    List<Choice> choices = []
+    boolean allowMultipleAnswers
 }

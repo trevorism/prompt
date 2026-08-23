@@ -1,6 +1,7 @@
 package com.trevorism.service
 
 import com.trevorism.model.Answer
+import com.trevorism.model.Choice
 import com.trevorism.model.Question
 import com.trevorism.secure.Roles
 import io.micronaut.http.HttpStatus
@@ -62,6 +63,66 @@ class DefaultQuestionServiceTest {
         } catch (HttpStatusException e) {
             assert e.status == HttpStatus.BAD_REQUEST
         }
+    }
+
+    @Test
+    void createLeavesAFreeFormQuestionWithoutChoices() {
+        Question created = service.create(new Question(text: "hello"), "asker")
+
+        assert created.choices == []
+        assert !created.allowMultipleAnswers
+    }
+
+    @Test
+    void createNormalizesLabelOnlyChoicesIntoValues() {
+        Question question = new Question(text: "pick", choices: [
+                new Choice(label: "Ship It"), new Choice(label: "Hold Off")
+        ])
+
+        Question created = service.create(question, "asker")
+
+        assert created.choices.collect { it.value } == ["ship-it", "hold-off"]
+        assert created.choices.collect { it.label } == ["Ship It", "Hold Off"]
+        assert repo.get(created.id).choices.size() == 2
+    }
+
+    @Test
+    void createAllowsAnApprovalToCarryChoices() {
+        Question question = new Question(text: "approve?", kind: "approval", allowMultipleAnswers: true,
+                choices: [new Choice(label: "Yes"), new Choice(label: "Needs changes")])
+
+        Question created = service.create(question, "asker")
+
+        assert created.kind == "approval"
+        assert created.allowMultipleAnswers
+        assert created.choices.collect { it.value } == ["yes", "needs-changes"]
+    }
+
+    @Test
+    void createRejectsAQuestionWithASingleChoice() {
+        Question question = new Question(text: "pick", choices: [new Choice(label: "Only one")])
+
+        try {
+            service.create(question, "asker")
+            assert false
+        } catch (HttpStatusException e) {
+            assert e.status == HttpStatus.BAD_REQUEST
+        }
+        assert publishedAsked.isEmpty()
+    }
+
+    @Test
+    void createRejectsChoicesCombinedWithChatGpt() {
+        Question question = new Question(text: "pick", askChatGpt: true,
+                choices: [new Choice(label: "Yes"), new Choice(label: "No")])
+
+        try {
+            service.create(question, "asker")
+            assert false
+        } catch (HttpStatusException e) {
+            assert e.status == HttpStatus.BAD_REQUEST
+        }
+        assert aiAnswers.isEmpty()
     }
 
     @Test

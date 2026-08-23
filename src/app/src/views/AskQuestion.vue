@@ -12,6 +12,9 @@ export default {
       askChatGpt: false,
       privateQuestion: false,
       requestApproval: false,
+      multipleChoice: false,
+      allowMultipleAnswers: false,
+      choices: ['', ''],
       collapsed: false,
       askUser: '',
       userOptions: [],
@@ -20,7 +23,18 @@ export default {
       loading: false
     }
   },
+  computed: {
+    enteredChoices() {
+      return this.choices.map((choice) => choice.trim()).filter((choice) => choice.length > 0)
+    }
+  },
   methods: {
+    addChoice() {
+      this.choices.push('')
+    },
+    removeChoice(index) {
+      this.choices.splice(index, 1)
+    },
     handleSubmit: function () {
       if (this.text.length === 0) {
         this.errorMessage = 'Please enter a question'
@@ -30,17 +44,23 @@ export default {
         this.errorMessage = 'Select an approver for an approval request'
         return
       }
+      if (this.multipleChoice && this.enteredChoices.length < 2) {
+        this.errorMessage = 'Enter at least two choices'
+        return
+      }
       this.errorMessage = ''
       const dueDateISO = this.dueDate ? new Date(this.dueDate).toISOString() : null;
       this.loading = true
       axios
         .post('api/question', {
           text: this.text,
-          askChatGpt: this.askChatGpt,
+          askChatGpt: this.askChatGpt && !this.multipleChoice,
           targetIdentityId: this.askUser,
           privateQuestion: this.privateQuestion,
           dueDate: dueDateISO,
-          kind: this.requestApproval ? 'approval' : 'question'
+          kind: this.requestApproval ? 'approval' : 'question',
+          choices: this.multipleChoice ? this.enteredChoices.map((label) => ({ label })) : [],
+          allowMultipleAnswers: this.multipleChoice && this.allowMultipleAnswers
         })
         .then(() => {
           this.errorMessage = ''
@@ -94,7 +114,36 @@ export default {
               />
               <VaCheckbox v-model="privateQuestion" label="Private to the selected user" />
               <VaCheckbox v-model="requestApproval" label="Request approval (they respond Approve / Reject)" />
-              <VaCheckbox v-model="askChatGpt" label="Also ask Chat-GPT" />
+              <VaCheckbox v-model="multipleChoice" label="Offer multiple choice answers" />
+
+              <div v-if="multipleChoice" class="grid gap-3 pl-6 border-l-2 border-slate-200">
+                <div v-for="(choice, index) in choices" :key="index" class="flex items-center gap-2">
+                  <va-input
+                    class="max-w-sm grow"
+                    v-model="choices[index]"
+                    :label="'Choice ' + (index + 1)"
+                  />
+                  <va-button
+                    v-if="choices.length > 2"
+                    preset="plain"
+                    size="small"
+                    color="danger"
+                    @click="removeChoice(index)"
+                  >
+                    Remove
+                  </va-button>
+                </div>
+                <div>
+                  <va-button preset="secondary" size="small" @click="addChoice">Add choice</va-button>
+                </div>
+                <VaCheckbox v-model="allowMultipleAnswers" label="Allow more than one selection" />
+              </div>
+
+              <VaCheckbox
+                v-model="askChatGpt"
+                :disabled="multipleChoice"
+                label="Also ask Chat-GPT"
+              />
               <div class="flex items-center gap-3">
                 <va-date-input class="max-w-xs" v-model="dueDate" label="Due date" mode="single" />
                 <va-button v-if="dueDate" preset="plain" size="small" @click="clearDate">Clear</va-button>

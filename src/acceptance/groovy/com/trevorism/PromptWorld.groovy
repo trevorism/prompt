@@ -39,6 +39,12 @@ class PromptWorld {
         createQuestion([text: "${MARKER} approval request".toString(), kind: "approval", targetIdentityId: approverId])
     }
 
+    Map createMultipleChoice(boolean allowMultipleAnswers, List<String> labels) {
+        createQuestion([text                : "${MARKER} multiple choice question".toString(), kind: "question",
+                        allowMultipleAnswers: allowMultipleAnswers,
+                        choices             : labels.collect { [label: it] }])
+    }
+
     Map fetchQuestion(String id) {
         body = authClient.get("${BASE_URL}/api/question/${id}".toString())
         return gson.fromJson(body, Map)
@@ -57,6 +63,30 @@ class PromptWorld {
 
     Map decide(String id, boolean approved, String reason) {
         answer(id, [text: reason, approved: approved])
+    }
+
+    Map chooseOption(String id, List<String> values) {
+        answer(id, [selectedChoices: values])
+    }
+
+    void attemptChooseOption(String id, List<String> values) {
+        try {
+            chooseOption(id, values)
+            rejected = false
+        } catch (Exception ignored) {
+            rejected = true
+            body = null
+        }
+    }
+
+    void attemptCreateQuestion(Map question) {
+        try {
+            createQuestion(question)
+            rejected = false
+        } catch (Exception ignored) {
+            rejected = true
+            body = null
+        }
     }
 
     // Anonymous calls: the trevorism HttpClient throws on non-2xx, so a rejected (401)

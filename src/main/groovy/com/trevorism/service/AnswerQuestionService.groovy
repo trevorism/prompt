@@ -35,6 +35,13 @@ class AnswerQuestionService implements AnswerService {
     @Override
     UiAnswer answerQuestion(String questionId, Answer answer, String identityId) {
         Question question = questionRepository.get(questionId)
+        if (question == null)
+            throw new HttpStatusException(HttpStatus.NOT_FOUND, "Question not found")
+
+        QuestionChoices.validateSelection(question, answer)
+        if (!answer.text && answer.selectedChoices)
+            answer.text = QuestionChoices.describe(question, answer.selectedChoices)
+
         List<User> users = userRepository.list()
 
         answer.answeredDate = new Date()
@@ -52,7 +59,8 @@ class AnswerQuestionService implements AnswerService {
         eventPublishingService.publishQuestionAnswered(question, created, username)
 
         return new UiAnswer(id: created.id, answeredDate: created.answeredDate, questionId: created.questionId,
-                text: created.text, username: username, approved: created.approved)
+                text: created.text, username: username, approved: created.approved,
+                selectedChoices: created.selectedChoices ?: [])
     }
 
     @Override
@@ -70,10 +78,7 @@ class AnswerQuestionService implements AnswerService {
                         .addFilter(new SimpleFilter("privateQuestion", FilterConstants.OPERATOR_EQUAL, false))
                         .build())
                 .sort { a, b -> b.createDate <=> a.createDate }
-                .collect { Question question ->
-                    new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                            answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind, dueDate: question.dueDate)
-                }
+                .collect { Question question -> toUiQuestion(question, users) }
         return questions
     }
 
@@ -91,10 +96,7 @@ class AnswerQuestionService implements AnswerService {
                         new SimpleFilter("targetIdentityId", FilterConstants.OPERATOR_EQUAL, identityId),
                         new SimpleFilter("answered", FilterConstants.OPERATOR_EQUAL, false)).build())
                 .sort { a, b -> b.createDate <=> a.createDate }
-                .collect { Question question ->
-                    new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                            answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind, dueDate: question.dueDate)
-                }
+                .collect { Question question -> toUiQuestion(question, users) }
         return questions
     }
 
@@ -115,8 +117,7 @@ class AnswerQuestionService implements AnswerService {
             throw new HttpStatusException(HttpStatus.NOT_FOUND, "Question not found")
 
         List<User> users = userRepository.list()
-        return new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind, dueDate: question.dueDate)
+        return toUiQuestion(question, users)
     }
 
     @Override
@@ -177,8 +178,7 @@ class AnswerQuestionService implements AnswerService {
 
     private static QuestionListItem createQuestionListItem(Question question, List<Answer> answers, List<User> users) {
         QuestionListItem item = new QuestionListItem()
-        item.question = new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
-                answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind, dueDate: question.dueDate)
+        item.question = toUiQuestion(question, users)
         item.answers = answers.findAll { it.questionId == question.id }
                 .sort { a, b -> b.answeredDate <=> a.answeredDate }
                 .collect { Answer answer ->
@@ -187,9 +187,17 @@ class AnswerQuestionService implements AnswerService {
                         username = ChatService.CHAT_GPT_IDENTITY
 
                     new UiAnswer(id: answer.id, answeredDate: answer.answeredDate, questionId: answer.questionId,
-                            text: answer.text, username: username, approved: answer.approved)
+                            text: answer.text, username: username, approved: answer.approved,
+                            selectedChoices: answer.selectedChoices ?: [])
                 }
         return item
+    }
+
+    private static UiQuestion toUiQuestion(Question question, List<User> users) {
+        new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
+                answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind,
+                dueDate: question.dueDate, choices: question.choices ?: [],
+                allowMultipleAnswers: question.allowMultipleAnswers)
     }
 
     private static String findMatchingUsername(List<User> users, question) {

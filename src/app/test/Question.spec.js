@@ -15,8 +15,33 @@ const stubs = {
     emits: ['update:modelValue'],
     template:
       '<textarea class="va-textarea" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)"></textarea>'
+  },
+  'va-radio': {
+    props: ['modelValue', 'option', 'label', 'name'],
+    emits: ['update:modelValue'],
+    template:
+      '<label class="va-radio" :data-name="name" @click="$emit(\'update:modelValue\', option)">{{ label }}</label>'
+  },
+  'va-checkbox': {
+    props: ['modelValue', 'arrayValue', 'label'],
+    emits: ['update:modelValue'],
+    methods: {
+      toggle() {
+        const current = Array.isArray(this.modelValue) ? this.modelValue : []
+        const next = current.includes(this.arrayValue)
+          ? current.filter((value) => value !== this.arrayValue)
+          : [...current, this.arrayValue]
+        this.$emit('update:modelValue', next)
+      }
+    },
+    template: '<label class="va-checkbox" @click="toggle">{{ label }}</label>'
   }
 }
+
+const colorChoices = [
+  { value: 'red', label: 'Red' },
+  { value: 'green', label: 'Green' }
+]
 
 const now = 1751683200000
 function mountQuestion(props = {}) {
@@ -29,6 +54,10 @@ function mountQuestion(props = {}) {
 // Find a stubbed va-button by its (trimmed) label.
 function button(wrapper, label) {
   return wrapper.findAll('.va-button').find((b) => b.text().trim() === label)
+}
+
+function choice(wrapper, selector, label) {
+  return wrapper.findAll(selector).find((c) => c.text().trim() === label)
 }
 
 beforeEach(() => {
@@ -92,7 +121,10 @@ describe('Question answering', () => {
     await button(wrapper, 'Submit').trigger('click')
     await flushPromises()
 
-    expect(axios.post).toHaveBeenCalledWith('/api/question/q1/answer', { text: 'because' })
+    expect(axios.post).toHaveBeenCalledWith('/api/question/q1/answer', {
+      text: 'because',
+      selectedChoices: []
+    })
     expect(wrapper.emitted('answeredQuestion')[0][0]).toEqual({ id: 'a1', text: 'because' })
   })
 
@@ -103,7 +135,11 @@ describe('Question answering', () => {
     await button(wrapper, 'Approve').trigger('click')
     await flushPromises()
 
-    expect(axios.post).toHaveBeenCalledWith('/api/question/q1/answer', { text: 'Approved', approved: true })
+    expect(axios.post).toHaveBeenCalledWith('/api/question/q1/answer', {
+      text: 'Approved',
+      approved: true,
+      selectedChoices: []
+    })
   })
 
   it('surfaces an error message when the API call fails', async () => {
@@ -115,5 +151,113 @@ describe('Question answering', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Error submitting response')
+  })
+})
+
+describe('Question multiple choice', () => {
+  it('labels a question with choices as a Poll and renders a radio per choice', () => {
+    const wrapper = mountQuestion({ choices: colorChoices, answerMode: true })
+
+    expect(wrapper.text()).toContain('Poll')
+    expect(wrapper.text()).toContain('Select one')
+    expect(wrapper.findAll('.va-radio')).toHaveLength(2)
+    expect(wrapper.findAll('.va-checkbox')).toHaveLength(0)
+  })
+
+  it('scopes the radio group name to the question so two cards do not collide', () => {
+    const wrapper = mountQuestion({ choices: colorChoices, answerMode: true })
+
+    expect(wrapper.find('.va-radio').attributes('data-name')).toBe('choice-q1')
+  })
+
+  it('renders checkboxes when multiple answers are allowed', () => {
+    const wrapper = mountQuestion({
+      choices: colorChoices,
+      allowMultipleAnswers: true,
+      answerMode: true
+    })
+
+    expect(wrapper.text()).toContain('Select all that apply')
+    expect(wrapper.findAll('.va-checkbox')).toHaveLength(2)
+    expect(wrapper.findAll('.va-radio')).toHaveLength(0)
+  })
+
+  it('posts the selected choice with no comment', async () => {
+    axios.post.mockResolvedValue({ data: { id: 'a3', text: 'Green' } })
+    const wrapper = mountQuestion({ choices: colorChoices, answerMode: true })
+
+    await choice(wrapper, '.va-radio', 'Green').trigger('click')
+    await button(wrapper, 'Submit').trigger('click')
+    await flushPromises()
+
+    expect(axios.post).toHaveBeenCalledWith('/api/question/q1/answer', {
+      text: '',
+      selectedChoices: ['green']
+    })
+  })
+
+  it('posts an optional comment alongside the selected choice', async () => {
+    axios.post.mockResolvedValue({ data: { id: 'a4' } })
+    const wrapper = mountQuestion({ choices: colorChoices, answerMode: true })
+
+    await choice(wrapper, '.va-radio', 'Red').trigger('click')
+    await wrapper.find('.va-textarea').setValue('it is faster')
+    await button(wrapper, 'Submit').trigger('click')
+    await flushPromises()
+
+    expect(axios.post).toHaveBeenCalledWith('/api/question/q1/answer', {
+      text: 'it is faster',
+      selectedChoices: ['red']
+    })
+  })
+
+  it('posts every checked choice when multiple answers are allowed', async () => {
+    axios.post.mockResolvedValue({ data: { id: 'a5' } })
+    const wrapper = mountQuestion({
+      choices: colorChoices,
+      allowMultipleAnswers: true,
+      answerMode: true
+    })
+
+    await choice(wrapper, '.va-checkbox', 'Red').trigger('click')
+    await choice(wrapper, '.va-checkbox', 'Green').trigger('click')
+    await button(wrapper, 'Submit').trigger('click')
+    await flushPromises()
+
+    expect(axios.post).toHaveBeenCalledWith('/api/question/q1/answer', {
+      text: '',
+      selectedChoices: ['red', 'green']
+    })
+  })
+
+  it('does not call the API when nothing is selected', async () => {
+    const wrapper = mountQuestion({ choices: colorChoices, answerMode: true })
+
+    await button(wrapper, 'Submit').trigger('click')
+
+    expect(axios.post).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('Please select an option')
+  })
+
+  it('carries the selection on an approval decision without defaulting the reason', async () => {
+    axios.post.mockResolvedValue({ data: { id: 'a6' } })
+    const wrapper = mountQuestion({
+      kind: 'approval',
+      choices: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'changes', label: 'Needs changes' }
+      ],
+      answerMode: true
+    })
+
+    await choice(wrapper, '.va-radio', 'Needs changes').trigger('click')
+    await button(wrapper, 'Approve').trigger('click')
+    await flushPromises()
+
+    expect(axios.post).toHaveBeenCalledWith('/api/question/q1/answer', {
+      text: '',
+      approved: true,
+      selectedChoices: ['changes']
+    })
   })
 })

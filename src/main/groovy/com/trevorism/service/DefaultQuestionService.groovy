@@ -39,6 +39,9 @@ class DefaultQuestionService implements QuestionService {
         if (question.text == null || question.text.isEmpty())
             throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Question text is required")
 
+        question.choices = QuestionChoices.normalize(question.choices)
+        QuestionChoices.validateForCreate(question)
+
         question.createDate = new Date()
         question.answered = false
         question.identityId = requesterId

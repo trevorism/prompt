@@ -14,4 +14,7 @@ class Question {
     boolean privateQuestion
     String kind
     boolean overdueNotified
+
+    List<Choice> choices = []
+    boolean allowMultipleAnswers
 }

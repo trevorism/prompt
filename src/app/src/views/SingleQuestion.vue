@@ -48,6 +48,8 @@ const answerSingleQuestion = () => {
           :kind="question.data.kind"
           :due-date="question.data.dueDate"
           :answered="question.data.answered"
+          :choices="question.data.choices"
+          :allow-multiple-answers="question.data.allowMultipleAnswers"
           :answerMode="true"
           @answeredQuestion="answerSingleQuestion"
       ></question>

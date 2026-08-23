@@ -10,4 +10,5 @@ class QuestionAnsweredEvent {
     String answererIdentityId
     String answererUsername
     Date answeredDate
+    List<String> selectedChoices = []
 }

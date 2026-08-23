@@ -51,6 +51,8 @@ export default {
           :kind="question.kind"
           :due-date="question.dueDate"
           :answered="question.answered"
+          :choices="question.choices"
+          :allow-multiple-answers="question.allowMultipleAnswers"
           :answerMode="true"
           @answeredQuestion="setAnswer"
         ></question>

@@ -11,4 +11,5 @@ class ApprovalDecidedEvent {
     String approverIdentityId
     String approverUsername
     Date decidedDate
+    List<String> selectedChoices = []
 }
