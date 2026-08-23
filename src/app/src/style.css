@@ -6,6 +6,15 @@
   --border: #e2e8f0;    /* slate-200 */
 }
 
+.va-radio__square .va-radio__icon,
+.va-checkbox .va-checkbox__square {
+  border: 1px solid var(--va-secondary, #767c88);
+}
+
+.va-radio--selected .va-radio__icon {
+  border-color: var(--va-primary, #154ec1);
+}
+
 html,
 body {
   margin: 0;
