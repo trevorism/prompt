@@ -60,14 +60,16 @@ class DefaultEventPublishingService implements EventPublishingService {
         if (isApproval(question)) {
             ApprovalRequestedEvent event = new ApprovalRequestedEvent(questionId: question.id, text: question.text,
                     requesterIdentityId: question.identityId, approverIdentityId: question.targetIdentityId,
-                    createDate: question.createDate)
+                    createDate: question.createDate, choices: question.choices ?: [],
+                    allowMultipleAnswers: question.allowMultipleAnswers)
             publish(approvalRequestedEventClient, APPROVAL_REQUESTED_TOPIC, event)
             return
         }
         QuestionAskedEvent event = new QuestionAskedEvent(questionId: question.id, text: question.text,
                 askerIdentityId: question.identityId, targetIdentityId: question.targetIdentityId,
                 privateQuestion: question.privateQuestion, askChatGpt: question.askChatGpt,
-                createDate: question.createDate)
+                createDate: question.createDate, choices: question.choices ?: [],
+                allowMultipleAnswers: question.allowMultipleAnswers)
         publish(questionAskedEventClient, QUESTION_ASKED_TOPIC, event)
     }
 
@@ -78,14 +80,14 @@ class DefaultEventPublishingService implements EventPublishingService {
             ApprovalDecidedEvent event = new ApprovalDecidedEvent(questionId: question.id, questionText: question.text,
                     requesterIdentityId: question.identityId, decisionAnswerId: answer.id, approved: answer.approved,
                     reason: answer.text, approverIdentityId: answer.identityId, approverUsername: answererUsername,
-                    decidedDate: answer.answeredDate)
+                    decidedDate: answer.answeredDate, selectedChoices: answer.selectedChoices ?: [])
             publish(approvalDecidedEventClient, APPROVAL_DECIDED_TOPIC, event)
             return
         }
         QuestionAnsweredEvent event = new QuestionAnsweredEvent(questionId: question.id, questionText: question.text,
                 askerIdentityId: question.identityId, answerId: answer.id, answerText: answer.text,
                 answererIdentityId: answer.identityId, answererUsername: answererUsername,
-                answeredDate: answer.answeredDate)
+                answeredDate: answer.answeredDate, selectedChoices: answer.selectedChoices ?: [])
         publish(questionAnsweredEventClient, QUESTION_ANSWERED_TOPIC, event)
     }
 

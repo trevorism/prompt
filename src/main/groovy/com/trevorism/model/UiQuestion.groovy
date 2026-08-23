@@ -9,5 +9,7 @@ class UiQuestion {
     String username
     String kind
     Date dueDate
+    List<Choice> choices = []
+    boolean allowMultipleAnswers
 
 }

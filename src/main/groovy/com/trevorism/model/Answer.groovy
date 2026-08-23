@@ -9,4 +9,5 @@ class Answer {
     String identityId
     Boolean approved
     Map metadata
+    List<String> selectedChoices = []
 }

@@ -9,4 +9,6 @@ class QuestionAskedEvent {
     boolean privateQuestion
     boolean askChatGpt
     Date createDate
+    List<Choice> choices = []
+    boolean allowMultipleAnswers
 }

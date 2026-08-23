@@ -1,3 +1,7 @@
+## 1.1.0
+
+Add the ability to add choices when answering a question. Update dependencies.
+
 ## 1.0.0
 
 Update UI dependencies; this is releasable now.
