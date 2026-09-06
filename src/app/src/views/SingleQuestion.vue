@@ -1,10 +1,10 @@
 <script setup>
-import HeaderBar from "@trevorism/ui-header-bar";
+import { MenuBar } from "@trevorism/ui-header-bar";
+import { useAuth } from "@trevorism/ui-auth";
 import Question from "../components/Question.vue";
 
 import {reactive, ref} from 'vue'
 import axios from 'axios'
-import { useCookies } from 'vue3-cookies'
 import { useRouter } from 'vue-router';
 
 const props = defineProps({
@@ -15,8 +15,7 @@ const props = defineProps({
 });
 
 const router = useRouter();
-const { cookies } = useCookies()
-const authenticated = ref(!!cookies.get('user_name'))
+const { isAuthenticated: authenticated } = useAuth()
 const question = reactive({data: null});
 const renderable = ref(false)
 
@@ -37,7 +36,7 @@ const answerSingleQuestion = () => {
 
 <template>
   <div>
-    <header-bar :local="false"></header-bar>
+    <menu-bar></menu-bar>
     <div class="page-container">
     <div v-if="renderable">
       <question

@@ -4,7 +4,7 @@ import axios from 'axios'
 import AskQuestion from '../src/views/AskQuestion.vue'
 
 vi.mock('axios', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
-vi.mock('@trevorism/ui-header-bar', () => ({ default: { template: '<div class="header-bar" />' } }))
+vi.mock('@trevorism/ui-header-bar', () => ({ MenuBar: { name: 'MenuBar', template: '<div class="menu-bar" />' } }))
 
 const checkable = {
   props: ['modelValue', 'label', 'disabled'],
@@ -21,7 +21,7 @@ const textField = {
 }
 
 const stubs = {
-  'header-bar': true,
+  'menu-bar': true,
   'va-form': { template: '<form class="va-form"><slot /></form>' },
   'va-collapse': { template: '<div class="va-collapse"><slot /></div>' },
   'va-select': { props: ['modelValue'], template: '<div class="va-select" />' },

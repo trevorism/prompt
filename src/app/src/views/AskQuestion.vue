@@ -1,10 +1,10 @@
 <script>
-import HeaderBar from '@trevorism/ui-header-bar'
+import { MenuBar } from '@trevorism/ui-header-bar'
 import axios from 'axios'
 export default {
   name: 'AskQuestion',
   components: {
-    HeaderBar
+    MenuBar
   },
   data() {
     return {
@@ -92,7 +92,7 @@ export default {
 
 <template>
   <div>
-    <header-bar :local="false"></header-bar>
+    <menu-bar></menu-bar>
     <div class="page-container">
       <h1 class="text-2xl font-bold text-slate-800 mb-1">Ask a question</h1>
       <p class="meta mb-5">Direct it to a specific user, or ask the whole team.</p>

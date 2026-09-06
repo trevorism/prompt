@@ -111,6 +111,44 @@ class PromptWorld {
         }
     }
 
+    static final int CONNECT_TIMEOUT_MS = 10_000
+    static final int READ_TIMEOUT_MS = 30_000
+
+    int status
+    String location
+
+    private HttpURLConnection open(String path, String method) {
+        HttpURLConnection connection = new URL("${BASE_URL}/${path}").openConnection() as HttpURLConnection
+        connection.instanceFollowRedirects = false
+        connection.requestMethod = method
+        connection.connectTimeout = CONNECT_TIMEOUT_MS
+        connection.readTimeout = READ_TIMEOUT_MS
+        return connection
+    }
+
+    /**
+     * Posts with no body under a caller-chosen content type. A browser labels a bodyless post
+     * form-urlencoded, and an endpoint that only consumes JSON answers 415 before the handler
+     * runs, which a suite that always sends JSON cannot see.
+     */
+    void anonPostAs(String path, String contentType) {
+        HttpURLConnection connection = open(path, "POST")
+        connection.setRequestProperty("Content-Type", contentType)
+        connection.setRequestProperty("Content-Length", "0")
+        connection.doOutput = true
+        connection.outputStream.withCloseable { it.write(new byte[0]) }
+        status = connection.responseCode
+        body = status < 400 ? connection.inputStream.text : null
+        connection.disconnect()
+    }
+
+    void anonGetWithoutFollowing(String path) {
+        HttpURLConnection connection = open(path, "GET")
+        status = connection.responseCode
+        location = connection.getHeaderField("Location")
+        connection.disconnect()
+    }
+
     void cleanup() {
         createdAnswerIds.each { String id -> try { authClient.delete("${BASE_URL}/api/answer/${id}".toString()) } catch (ignored) {} }
         createdQuestionIds.each { String id -> try { authClient.delete("${BASE_URL}/api/question/${id}".toString()) } catch (ignored) {} }

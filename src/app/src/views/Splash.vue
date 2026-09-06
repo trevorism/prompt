@@ -1,51 +1,30 @@
 <script setup>
-import HeaderBar from '@trevorism/ui-header-bar'
-import axios from 'axios'
-import { onMounted, ref } from 'vue'
+import { MenuBar } from '@trevorism/ui-header-bar'
+import { useAuth } from '@trevorism/ui-auth'
+import { ref } from 'vue'
 import PendingQuestions from './PendingQuestions.vue'
 import AllQuestions from './AllQuestions.vue'
 import UnansweredQuestions from './UnansweredQuestions.vue'
 import MyQuestions from './MyQuestions.vue'
-import { useCookies } from 'vue3-cookies'
 
 const selectedTab = ref(0)
-const { cookies } = useCookies()
-const authenticated = ref(!!cookies.get('user_name'))
-
-// Bootstrap auth state from an authenticated call. Locally the vite proxy sets the user_name
-// cookie on the /api response; in prod this flips to true only if the session is already valid.
-onMounted(() => {
-  if (!authenticated.value) {
-    axios
-      .get('/api/user')
-      .then(() => {
-        authenticated.value = !!cookies.get('user_name')
-      })
-      .catch(() => {})
-  }
-})
+const { isAuthenticated, loading, login } = useAuth()
 </script>
 
 <template>
   <div>
-    <header-bar :local="false"></header-bar>
+    <menu-bar></menu-bar>
     <div class="page-container">
       <div class="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 class="text-2xl font-bold text-slate-800">Prompt</h1>
           <p class="meta">Ask questions and request approvals across the team.</p>
         </div>
-        <va-button v-if="authenticated" color="primary" to="/ask">Ask a question</va-button>
-        <va-button
-          v-else
-          color="primary"
-          href="https://login.auth.trevorism.com/?return_url=https://prompt.action.trevorism.com"
-        >
-          Login
-        </va-button>
+        <va-button v-if="isAuthenticated" color="primary" to="/ask">Ask a question</va-button>
+        <va-button v-else-if="!loading" color="primary" @click="login()">Login</va-button>
       </div>
 
-      <template v-if="authenticated">
+      <template v-if="isAuthenticated">
         <va-tabs v-model="selectedTab" grow>
           <va-tab> All </va-tab>
           <va-tab> Approvals </va-tab>
@@ -71,6 +50,7 @@ onMounted(() => {
           </div>
         </div>
       </template>
+      <div v-else-if="loading" class="empty-state">Checking your session…</div>
       <div v-else class="empty-state">Please log in to view and answer questions.</div>
     </div>
   </div>

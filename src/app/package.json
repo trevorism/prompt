@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@trevorism/ui-auth": "^1.2.0",
+    "@trevorism/ui-header-bar": "^6.0.0",
     "vue": "^3.5.41",
     "vue-router": "^5.2.0",
     "vue3-click-away": "^1.2.4",
@@ -25,7 +27,6 @@
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.16.1",
-    "@trevorism/ui-header-bar": "^5.3.0",
     "@trevorism/vitest-test-result-events": "^2.0.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/eslint-config-prettier": "^10.2.0",
@@ -40,8 +41,7 @@
     "start-server-and-test": "^3.0.12",
     "tailwindcss": "^4.3.3",
     "vite": "^8.2.2",
-    "vitest": "^4.1.11",
-    "vue3-cookies": "^1.0.6"
+    "vitest": "^4.1.11"
   },
   "allowScripts": {
     "vue-demi@0.14.10": true,
