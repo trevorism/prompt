@@ -2,9 +2,13 @@
 import axios from 'axios'
 import Question from '../components/Question.vue'
 import Answer from '../components/Answer.vue'
-import { useCookies } from 'vue3-cookies'
+import { useAuth } from '@trevorism/ui-auth'
 
 export default {
+  setup() {
+    const { isAuthenticated } = useAuth()
+    return { isAuthenticated }
+  },
   components: { Answer, Question },
   props: {
     endpoint: {
@@ -17,8 +21,7 @@ export default {
     }
   },
   data() {
-    return {
-      authenticated: false,
+    return {
       answered: false,
       questionList: [],
       answer: {}
@@ -33,24 +36,20 @@ export default {
   },
   mounted() {
     let self = this
-    const { cookies } = useCookies()
-    self.authenticated = !!cookies.get('user_name')
 
     axios
       .get(self.endpoint)
       .then((result) => {
         self.questionList = result.data
       })
-      .catch(() => {
-        self.authenticated = false
-      })
+      .catch(() => {})
   }
 }
 </script>
 
 <template>
   <div>
-    <div v-if="authenticated">
+    <div v-if="isAuthenticated">
       <div v-if="questionList.length === 0" class="empty-state">{{ emptyMessage }}</div>
       <div v-for="question in questionList">
         <question

@@ -1,3 +1,9 @@
+## 1.2.0
+
+Move the session onto the shared auth libraries. Five views each decided
+separately whether you were signed in; they now read one shared session, so the
+page follows a login or a logout without a reload.
+
 ## 1.1.0
 
 Add the ability to add choices when answering a question. Update dependencies.
