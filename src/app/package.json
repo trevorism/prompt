@@ -19,9 +19,10 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@trevorism/ui-auth": "^1.2.0",
-    "@trevorism/ui-header-bar": "^6.0.0",
-    "vue": "^3.5.41",
-    "vue-router": "^5.2.0",
+    "@trevorism/ui-header-bar": "^6.1.0",
+    "axios": "^1.20.0",
+    "vue": "^3.5.42",
+    "vue-router": "^5.3.1",
     "vue3-click-away": "^1.2.4",
     "vuestic-ui": "^1.10.3"
   },
@@ -30,10 +31,9 @@
     "@trevorism/vitest-test-result-events": "^2.0.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/eslint-config-prettier": "^10.2.0",
-    "@vue/test-utils": "^2.4.11",
-    "axios": "^1.19.0",
-    "cypress": "^15.21.0",
-    "eslint": "^10.9.0",
+    "@vue/test-utils": "^2.5.0",
+    "cypress": "^16.0.0",
+    "eslint": "^10.10.0",
     "eslint-plugin-cypress": "^7.0.1",
     "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
@@ -41,10 +41,10 @@
     "start-server-and-test": "^3.0.12",
     "tailwindcss": "^4.3.3",
     "vite": "^8.2.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "allowScripts": {
     "vue-demi@0.14.10": true,
-    "cypress@15.21.0": true
+    "cypress@16.0.0": true
   }
 }
