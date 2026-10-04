@@ -39,6 +39,7 @@ class AnswerQuestionService implements AnswerService {
             throw new HttpStatusException(HttpStatus.NOT_FOUND, "Question not found")
 
         QuestionChoices.validateSelection(question, answer)
+        NumericAnswers.applyToAnswer(question, answer)
         if (!answer.text && answer.selectedChoices)
             answer.text = QuestionChoices.describe(question, answer.selectedChoices)
 
@@ -197,7 +198,8 @@ class AnswerQuestionService implements AnswerService {
         new UiQuestion(id: question.id, text: question.text, createDate: question.createDate,
                 answered: question.answered, username: findMatchingUsername(users, question), kind: question.kind,
                 dueDate: question.dueDate, choices: question.choices ?: [],
-                allowMultipleAnswers: question.allowMultipleAnswers)
+                allowMultipleAnswers: question.allowMultipleAnswers, answerType: question.answerType, unit: question.unit,
+                minValue: question.minValue, maxValue: question.maxValue)
     }
 
     private static String findMatchingUsername(List<User> users, question) {

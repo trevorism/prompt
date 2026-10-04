@@ -60,7 +60,7 @@ class QuestionController {
     @Operation(summary = "Delete a Question by id **Secure")
     @Delete(value = "{id}", produces = MediaType.APPLICATION_JSON)
     @Secure(Roles.USER)
-    boolean delete(String id, Authentication authentication) {
+    Question delete(String id, Authentication authentication) {
         questionService.delete(id, requesterId(authentication), authentication.getRoles())
     }
 

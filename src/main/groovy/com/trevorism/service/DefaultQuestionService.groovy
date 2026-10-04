@@ -41,6 +41,7 @@ class DefaultQuestionService implements QuestionService {
 
         question.choices = QuestionChoices.normalize(question.choices)
         QuestionChoices.validateForCreate(question)
+        NumericAnswers.validateForCreate(question)
 
         question.createDate = new Date()
         question.answered = false
@@ -87,7 +88,7 @@ class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    boolean delete(String id, String requesterId, Collection<String> requesterRoles) {
+    Question delete(String id, String requesterId, Collection<String> requesterRoles) {
         authorizeModify(id, requesterId, requesterRoles)
         questionRepository.delete(id)
     }

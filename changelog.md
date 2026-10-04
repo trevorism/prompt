@@ -1,3 +1,7 @@
+## 1.3.0
+
+Questions can expect a number. Set `answerType` to `number`, with an optional `unit`, `minValue` and `maxValue`; the answer card then shows a number input, and the answer is checked on the server and stored with a numeric `value`.
+
 ## 1.2.0
 
 Move the session onto the shared auth libraries. Five views each decided

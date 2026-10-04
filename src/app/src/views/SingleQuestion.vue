@@ -49,6 +49,10 @@ const answerSingleQuestion = () => {
           :answered="question.data.answered"
           :choices="question.data.choices"
           :allow-multiple-answers="question.data.allowMultipleAnswers"
+          :answer-type="question.data.answerType"
+          :unit="question.data.unit"
+          :min-value="question.data.minValue"
+          :max-value="question.data.maxValue"
           :answerMode="true"
           @answeredQuestion="answerSingleQuestion"
       ></question>

@@ -10,4 +10,5 @@ class Answer {
     Boolean approved
     Map metadata
     List<String> selectedChoices = []
+    Double value
 }

@@ -48,6 +48,26 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false
+  },
+  answerType: {
+    type: String,
+    required: false,
+    default: null
+  },
+  unit: {
+    type: String,
+    required: false,
+    default: null
+  },
+  minValue: {
+    type: Number,
+    required: false,
+    default: null
+  },
+  maxValue: {
+    type: Number,
+    required: false,
+    default: null
   }
 })
 
@@ -55,6 +75,24 @@ const emit = defineEmits(['answeredQuestion'])
 
 const isApproval = computed(() => props.kind === 'approval')
 const hasChoices = computed(() => props.choices.length > 0)
+const expectsNumber = computed(() => props.answerType === 'number')
+const numberLabel = computed(() => (props.unit ? `Your answer (${props.unit})` : 'Your answer'))
+const NUMBER_PATTERN = /^-?\d+(\.\d+)?$/
+
+const numberProblem = (text) => {
+  const trimmed = String(text ?? '').trim()
+  if (!NUMBER_PATTERN.test(trimmed)) {
+    return 'Please enter a number'
+  }
+  const value = Number(trimmed)
+  if (props.minValue !== null && value < props.minValue) {
+    return `Please enter a number of at least ${props.minValue}`
+  }
+  if (props.maxValue !== null && value > props.maxValue) {
+    return `Please enter a number of at most ${props.maxValue}`
+  }
+  return ''
+}
 const overdue = computed(() => props.dueDate && !props.answered && new Date(props.dueDate) < new Date())
 const accentClass = computed(() => (isApproval.value ? 'border-l-blue-500' : 'border-l-slate-300'))
 
@@ -92,6 +130,14 @@ const submitResponse = (payload, emptyMessage) => {
     errorMessage.value = emptyMessage
     return
   }
+  if (expectsNumber.value) {
+    const problem = numberProblem(payload.text)
+    if (problem) {
+      errorMessage.value = problem
+      return
+    }
+    payload.text = String(payload.text).trim()
+  }
   payload.selectedChoices = chosen
 
   answerFormVisible.value = false
@@ -118,7 +164,7 @@ const submitResponse = (payload, emptyMessage) => {
 }
 
 const handleSubmit = () => {
-  submitResponse({ text: answerText.value }, 'Please enter an answer')
+  submitResponse({ text: String(answerText.value ?? '') }, 'Please enter an answer')
 }
 
 const handleDecision = (approved) => {
@@ -143,7 +189,7 @@ const showAnswerPrompt = () => {
 <template>
   <div class="bg-white rounded-lg border border-slate-200 border-l-4 shadow-sm p-5 mb-4" :class="accentClass">
     <div class="flex items-center justify-between">
-      <span class="kind-label">{{ isApproval ? 'Approval' : hasChoices ? 'Poll' : 'Question' }}</span>
+      <span class="kind-label">{{ isApproval ? 'Approval' : hasChoices ? 'Poll' : expectsNumber ? 'Number' : 'Question' }}</span>
       <va-chip v-if="overdue" color="danger" size="small">{{ isApproval ? 'Expired' : 'Overdue' }}</va-chip>
     </div>
 
@@ -184,7 +230,18 @@ const showAnswerPrompt = () => {
         </div>
       </fieldset>
 
+      <va-input
+        v-if="expectsNumber"
+        class="number-answer w-full"
+        v-model="answerText"
+        type="number"
+        inputmode="decimal"
+        :min="minValue ?? undefined"
+        :max="maxValue ?? undefined"
+        :label="numberLabel"
+      />
       <va-textarea
+        v-else
         class="w-full"
         v-model="answerText"
         :label="hasChoices ? 'Comment (optional)' : isApproval ? 'Reason (optional)' : 'Your answer'"
