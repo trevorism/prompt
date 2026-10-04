@@ -88,7 +88,7 @@ class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    boolean delete(String id, String requesterId, Collection<String> requesterRoles) {
+    Question delete(String id, String requesterId, Collection<String> requesterRoles) {
         authorizeModify(id, requesterId, requesterRoles)
         questionRepository.delete(id)
     }

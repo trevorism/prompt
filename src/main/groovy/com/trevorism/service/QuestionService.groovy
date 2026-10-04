@@ -12,7 +12,7 @@ interface QuestionService {
 
     Question update(String id, Question question, String requesterId, Collection<String> requesterRoles)
 
-    boolean delete(String id, String requesterId, Collection<String> requesterRoles)
+    Question delete(String id, String requesterId, Collection<String> requesterRoles)
 
     void markOverdueIfUnanswered(String id)
 }
