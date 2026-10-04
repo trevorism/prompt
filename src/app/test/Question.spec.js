@@ -16,6 +16,12 @@ const stubs = {
     template:
       '<textarea class="va-textarea" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)"></textarea>'
   },
+  'va-input': {
+    props: ['modelValue', 'label', 'type', 'min', 'max'],
+    emits: ['update:modelValue'],
+    template:
+      '<input class="va-input" :data-type="type" :data-label="label" :min="min" :max="max" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />'
+  },
   'va-radio': {
     props: ['modelValue', 'option', 'label', 'name'],
     emits: ['update:modelValue'],
@@ -259,5 +265,45 @@ describe('Question multiple choice', () => {
       approved: true,
       selectedChoices: ['changes']
     })
+  })
+
+  it('asks for a number with its unit and range instead of free text', () => {
+    const wrapper = mountQuestion({ answerMode: true, answerType: 'number', unit: 'lb', minValue: 100, maxValue: 300 })
+
+    const input = wrapper.find('.va-input')
+    expect(input.attributes('data-type')).toBe('number')
+    expect(input.attributes('data-label')).toBe('Your answer (lb)')
+    expect([input.attributes('min'), input.attributes('max')]).toEqual(['100', '300'])
+    expect(wrapper.find('.va-textarea').exists()).toBe(false)
+    expect(wrapper.find('.kind-label').text()).toBe('Number')
+  })
+
+  it('posts a trimmed number', async () => {
+    axios.post.mockResolvedValue({ data: { id: 'a1', text: '182.5 lb' } })
+    const wrapper = mountQuestion({ answerMode: true, answerType: 'number', unit: 'lb' })
+
+    await wrapper.find('.va-input').setValue(' 182.5 ')
+    await button(wrapper, 'Submit').trigger('click')
+    await flushPromises()
+
+    expect(axios.post).toHaveBeenCalledWith('/api/question/q1/answer', { text: '182.5', selectedChoices: [] })
+  })
+
+  it('rejects text and out-of-range numbers before calling the API', async () => {
+    const wrapper = mountQuestion({ answerMode: true, answerType: 'number', minValue: 0, maxValue: 10 })
+
+    await wrapper.find('.va-input').setValue('lots')
+    await button(wrapper, 'Submit').trigger('click')
+    expect(wrapper.text()).toContain('Please enter a number')
+
+    await wrapper.find('.va-input').setValue('11')
+    await button(wrapper, 'Submit').trigger('click')
+    expect(wrapper.text()).toContain('Please enter a number of at most 10')
+
+    await wrapper.find('.va-input').setValue('-1')
+    await button(wrapper, 'Submit').trigger('click')
+    expect(wrapper.text()).toContain('Please enter a number of at least 0')
+
+    expect(axios.post).not.toHaveBeenCalled()
   })
 })

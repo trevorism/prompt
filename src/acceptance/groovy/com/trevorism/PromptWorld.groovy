@@ -45,6 +45,26 @@ class PromptWorld {
                         choices             : labels.collect { [label: it] }])
     }
 
+    Map createNumberQuestion(String unit, double minValue, double maxValue) {
+        createQuestion([text: "${MARKER} number question".toString(), kind: "question", answerType: "number",
+                        unit: unit, minValue: minValue, maxValue: maxValue])
+    }
+
+    void attemptAnswerText(String id, String text) {
+        try {
+            answerText(id, text)
+            rejected = false
+        } catch (Exception ignored) {
+            rejected = true
+            body = null
+        }
+    }
+
+    Map fetchAnswer(String id) {
+        body = authClient.get("${BASE_URL}/api/answer/${id}".toString())
+        return gson.fromJson(body, Map)
+    }
+
     Map fetchQuestion(String id) {
         body = authClient.get("${BASE_URL}/api/question/${id}".toString())
         return gson.fromJson(body, Map)

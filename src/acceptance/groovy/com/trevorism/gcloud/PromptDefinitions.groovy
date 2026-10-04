@@ -131,6 +131,31 @@ When(~/^the choices "(.*)" are attempted$/) { String values ->
     attemptChooseOption(currentQuestionId, values.split(",").toList())
 }
 
+Given(~/^a number question in "(.*)" from (\d+) to (\d+) is created$/) { String unit, Integer minValue, Integer maxValue ->
+    lastQuestion = createNumberQuestion(unit, minValue, maxValue)
+    currentQuestionId = lastQuestion.id
+}
+
+Then(~/^the question expects a number in "(.*)"$/) { String unit ->
+    Map question = fetchQuestion(currentQuestionId)
+    assert question.answerType == "number"
+    assert question.unit == unit
+}
+
+When(~/^I try to answer it with "(.*)"$/) { String text ->
+    attemptAnswerText(currentQuestionId, text)
+}
+
+When(~/^I answer it with "(.*)"$/) { String text ->
+    lastAnswer = answerText(currentQuestionId, text)
+}
+
+Then(~/^the stored answer has the value (.*) and the text "(.*)"$/) { String value, String text ->
+    Map stored = fetchAnswer(lastAnswer.id as String)
+    assert stored.value == Double.valueOf(value)
+    assert stored.text == text
+}
+
 Then(~/^the answer text is "(.*)"$/) { String expected ->
     assert lastAnswer.text == expected
 }

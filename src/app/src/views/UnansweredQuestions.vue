@@ -11,7 +11,8 @@ export default {
   },
   components: { Answer, Question },
   data() {
-    return {
+    return {
+
       answered: false,
       questionList: [],
       answer: {}
@@ -52,6 +53,10 @@ export default {
           :answered="question.answered"
           :choices="question.choices"
           :allow-multiple-answers="question.allowMultipleAnswers"
+          :answer-type="question.answerType"
+          :unit="question.unit"
+          :min-value="question.minValue"
+          :max-value="question.maxValue"
           :answerMode="true"
           @answeredQuestion="setAnswer"
         ></question>

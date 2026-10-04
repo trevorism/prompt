@@ -11,5 +11,9 @@ class UiQuestion {
     Date dueDate
     List<Choice> choices = []
     boolean allowMultipleAnswers
+    String answerType
+    String unit
+    Double minValue
+    Double maxValue
 
 }

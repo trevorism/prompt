@@ -41,6 +41,7 @@ class DefaultQuestionService implements QuestionService {
 
         question.choices = QuestionChoices.normalize(question.choices)
         QuestionChoices.validateForCreate(question)
+        NumericAnswers.validateForCreate(question)
 
         question.createDate = new Date()
         question.answered = false
